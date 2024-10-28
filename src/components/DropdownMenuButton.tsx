@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Download, Upload, Settings, FileUp, X } from "lucide-react"
+import { Download, Upload, Settings, FileUp, X, Plus, FileDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,9 +17,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useGlobalContext } from "@/context/GlobalContext"
 
-export default function Component() {
-    const { software, generateCSV, downloadCSV } = useGlobalContext()
+export default function DropdownMenuButton() {
+    const { 
+        software, 
+        generateCSV, 
+        downloadCSV, 
+        handleAddSoftware,
+    } = useGlobalContext()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const [file, setFile] = useState<File | null>(null)
     const [isDragging, setIsDragging] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -85,9 +91,14 @@ export default function Component() {
         }
     }
 
+    const handleDialogClose = () => {
+        setIsDialogOpen(false);
+        setFile(null);
+    }
+
     return (
         <>
-            <DropdownMenu>
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex items-center gap-2">
                         <Settings className="h-4 w-4" />
@@ -97,23 +108,30 @@ export default function Component() {
                 <DropdownMenuContent className="w-56 p-0">
                     <Button
                         variant="ghost"
+                        className="w-full justify-start px-4 py-2 h-auto font-normal" 
+                        onClick={handleAddSoftware}
+                    >
+                        <Plus className="mr-2 h-4 w-4" /> 
+                        <span>Add Software</span>
+                    </Button>
+                    <Button
+                        variant="ghost"
                         className="w-full justify-start px-4 py-2 h-auto font-normal"
                         onClick={handleExportAll}
                     >
-                        <Download className="mr-2 h-4 w-4" />
+                        <FileDown className="mr-2 h-4 w-4" />
                         <span>Download Report</span>
                     </Button>
-                    <Button
+                    {/* <Button
                         variant="ghost"
                         className="w-full justify-start px-4 py-2 h-auto font-normal"
                         onClick={handleUploadSheet}
                     >
                         <Upload className="mr-2 h-4 w-4" />
                         <span>Upload Sheet</span>
-                    </Button>
+                    </Button> */}
                 </DropdownMenuContent>
             </DropdownMenu>
-
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>

@@ -19,9 +19,11 @@ interface GlobalState {
     isDialogOpen: boolean;
     dialogMode: 'add' | 'edit';
     selectedSoftware: Software | undefined;
+    editingSoftware: Software | undefined;
+    filteredSoftwareList: Software[];
+    setFilteredSoftwareList: (data: Software[]) => void;
     setSelectedSoftware: React.Dispatch<React.SetStateAction<Software | undefined>>;
-    editingSoftware: Software | undefined; // Add this line
-    setEditingSoftware: React.Dispatch<React.SetStateAction<Software | undefined>>; // And this line
+    setEditingSoftware: React.Dispatch<React.SetStateAction<Software | undefined>>;
     setSoftware: React.Dispatch<React.SetStateAction<Software[]>>;
     setComments: React.Dispatch<React.SetStateAction<Comment[]>>;
     deleteComment: (id: number) => void;
@@ -51,6 +53,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
     const [selectedSoftware, setSelectedSoftware] = useState<Software | undefined>(undefined);
     const [editingSoftware, setEditingSoftware] = useState<Software | undefined>(undefined);
+    const [filteredSoftwareList, setFilteredSoftwareList] = useState<Software[]>([]);
 
     const deleteComment = (commentId: number) => {
         setComments((prevComments) => prevComments.filter((comment) => comment.id !== commentId));
@@ -234,10 +237,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return (
         <GlobalContext.Provider value={{
             software,
-            setSoftware,
-            setComments,
-            setSelectedSoftware,
-            deleteComment,
             comments,
             divisions,
             departments,
@@ -250,12 +249,18 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             isDialogOpen,
             dialogMode,
             selectedSoftware,
+            editingSoftware,
+            filteredSoftwareList,
+            setFilteredSoftwareList,
+            setSoftware,
+            setComments,
+            setSelectedSoftware,
             setIsDialogOpen,
+            setEditingSoftware,
+            deleteComment,
             handleAddSoftware,
             handleEditSoftware,
             handleSaveSoftware,
-            editingSoftware,
-            setEditingSoftware,
             updateSoftware,
             generateCSV,
             downloadCSV,

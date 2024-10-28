@@ -39,20 +39,6 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from "@/components/ui/tooltip"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from '@/components/ui/command'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
 import { 
   Plus, 
   Trash2, 
@@ -62,10 +48,7 @@ import {
   ArrowUpDown, 
   FileDown, 
   Search, 
-  Check, 
-  ChevronsUpDown 
 } from "lucide-react"
-import { cn } from '@/lib/utils'
 import { format, differenceInDays } from "date-fns"
 import { Software, CommentToAdd } from "@/types/types"
 import SoftwareDialog from "./SoftwareDialog";
@@ -74,6 +57,7 @@ import Header from "./Header"
 import Pagination from "./Pagination";
 import { YesNoIndicator } from "./YesNoIndicator";
 import SoftwareComments from "@/components/SoftwareComments";
+import Context from "@/components/Context";
 
 const mockUser = {
   name: "cereda",
@@ -84,7 +68,6 @@ const mockUser = {
 export default function Dashboard() {
   const {
     software,
-    setSoftware,
     isDialogOpen,
     dialogMode,
     selectedSoftware,
@@ -98,6 +81,7 @@ export default function Dashboard() {
     updateSoftware,
     generateCSV,
     downloadCSV,
+    filteredSoftwareList,
   } = useGlobalContext();
   const [softwareToDelete, setSoftwareToDelete] = useState<Software | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(true)
@@ -290,6 +274,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Context/>
       <div className="min-h-screen flex">
         <Sidebar mockUser={mockUser} toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} />
         <div className={`flex-1 overflow-auto transition-all duration-300 ${isMenuOpen ? 'ml-64' : 'ml-20'}`}>
@@ -316,8 +301,6 @@ export default function Dashboard() {
                       <Grid className="h-4 w-4" />
                     </Button>
                   </div>
-                  {/* <DropdownMenuButton /> */}
-                  {/* Add/Edit Dialog */}
                   <Button onClick={handleAddSoftware}>
                     <Plus className="mr-2 h-4 w-4" /> Add Software
                   </Button>
@@ -332,7 +315,7 @@ export default function Dashboard() {
                     <FileDown className="mr-2 h-4 w-4" /> Generate Report
                   </Button>
                 </div>
-              </div>
+              </div> 
               {/* Search Bar */}
               <div className="mb-4">
                 <div className="relative">
@@ -347,7 +330,7 @@ export default function Dashboard() {
               </div>
               {/* Table or List of Software Licenses */}
               {viewMode === "list" ? (
-                <>
+                <div>
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -425,7 +408,7 @@ export default function Dashboard() {
                       onPageChange={setCurrentPage}
                     />
                   )}
-                </>
+                </div>
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
