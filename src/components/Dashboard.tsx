@@ -7,47 +7,53 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger, SelectValue
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
 } from "@/components/ui/card"
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
 } from "@/components/ui/dialog"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table"
 import { Slider } from "@/components/ui/slider"
 import { Separator } from "@/components/ui/separator"
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
 } from "@/components/ui/tooltip"
-import { 
-  Plus, 
-  Trash2, 
-  AlertTriangle, 
-  Grid, 
-  List, 
-  ArrowUpDown, 
-  FileDown, 
-  Search, 
+import {
+  Plus,
+  Trash2,
+  AlertTriangle,
+  Grid,
+  List,
+  ArrowUpDown,
+  FileDown,
+  Search,
 } from "lucide-react"
 import { format, differenceInDays } from "date-fns"
 import { Software, CommentToAdd } from "@/types/types"
@@ -68,6 +74,9 @@ const mockUser = {
 export default function Dashboard() {
   const {
     software,
+    divisions,
+    departments,
+    vendors,
     isDialogOpen,
     dialogMode,
     selectedSoftware,
@@ -81,15 +90,18 @@ export default function Dashboard() {
     updateSoftware,
     generateCSV,
     downloadCSV,
-    filteredSoftwareList,
   } = useGlobalContext();
-  const [softwareToDelete, setSoftwareToDelete] = useState<Software | null>(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(true)
-  const [isMenuOpen, setIsMenuOpen] = useState(true)
-  const [viewMode, setViewMode] = useState("list")
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' })
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(0)
+  const [softwareToDelete, setSoftwareToDelete] = useState<Software | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [viewMode, setViewMode] = useState("list");
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [departmentFilter, setDepartmentFilter] = useState<number | undefined>(undefined);
+  const [divisionFilter, setDivisionFilter] = useState<number | undefined>(undefined);
+  const [vendorFilter, setVendorFilter] = useState<number | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(0);
   const [newComment, setNewComment] = useState<CommentToAdd>({
     user_id: 1,
     user_name: "cereda",
@@ -98,7 +110,7 @@ export default function Dashboard() {
     satisfaction_rate: 5,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  })
+  });
 
   // Toggle Sidebar
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
@@ -125,7 +137,7 @@ export default function Dashboard() {
     if (!softwareToDelete) return;
 
     const updatedSoftware = software.filter((s) => s.id !== softwareToDelete.id);
-    
+
     updateSoftware(updatedSoftware);
 
     try {
@@ -253,17 +265,29 @@ export default function Dashboard() {
     return sortableItems;
   }, [software, sortConfig]);
 
-  const filteredSoftware = sortedSoftware.filter(s =>
-    s.software_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.software_vendor.map(vend => vend.name).join(" ").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSoftware = useMemo(() => {
+    return software.filter((s) => {
+      const matchesName = s.software_name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter ? s.software_operational_status === statusFilter : true;
+      const matchesDepartment = departmentFilter
+        ? s.software_department.some((dept) => dept.id === departmentFilter)
+        : true;
+      const matchesDivision = divisionFilter
+        ? s.software_divisions_using.some((div) => div.id === divisionFilter)
+        : true;
+      const matchesVendor = vendorFilter
+        ? s.software_vendor.some((vend) => vend.id === vendorFilter)
+        : true;
+      return (matchesName) && matchesStatus && matchesDepartment && matchesDivision && matchesVendor;
+    });
+  }, [software, searchTerm, statusFilter, departmentFilter, divisionFilter, vendorFilter]);
 
   const itemsPerPage = 9;
   const totalPages = Math.ceil(filteredSoftware.length / itemsPerPage)
   const displayedSoftware = filteredSoftware.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
 
   const handleExportAll = () => {
-    const csv = generateCSV(software);
+    const csv = generateCSV(displayedSoftware);
     downloadCSV(csv, 'all_software.csv');
   }
 
@@ -274,7 +298,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Context/>
+      <Context />
       <div className="min-h-screen flex">
         <Sidebar mockUser={mockUser} toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} />
         <div className={`flex-1 overflow-auto transition-all duration-300 ${isMenuOpen ? 'ml-64' : 'ml-20'}`}>
@@ -315,17 +339,83 @@ export default function Dashboard() {
                     <FileDown className="mr-2 h-4 w-4" /> Generate Report
                   </Button>
                 </div>
-              </div> 
+              </div>
               {/* Search Bar */}
               <div className="mb-4">
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by Name or Vendor"
+                    placeholder="Search by Name"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8"
                   />
+                  <div className="flex space-x-2 mt-3">
+                    {/* Operational Status Filter */}
+                    <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? undefined : value)}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="All Statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="A">Active</SelectItem>
+                        <SelectItem value="I">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Department Filter */}
+                    <Select
+                      value={departmentFilter ? departmentFilter.toString() : "all"}
+                      onValueChange={(value) => setDepartmentFilter(value === "all" ? undefined : Number(value))}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="All Departments" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Departments</SelectItem>
+                        {departments.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.id.toString()}>
+                            {dept.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Division Filter */}
+                    <Select
+                      value={divisionFilter ? divisionFilter.toString() : "all"}
+                      onValueChange={(value) => setDivisionFilter(value === "all" ? undefined : Number(value))}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="All Divisions" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Divisions</SelectItem>
+                        {divisions.map((div) => (
+                          <SelectItem key={div.id} value={div.id.toString()}>
+                            {div.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {/* Vendor Filter */}
+                    <Select
+                      value={vendorFilter ? vendorFilter.toString() : "all"}
+                      onValueChange={(value) => setVendorFilter(value === "all" ? undefined : Number(value))}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="All Vendors" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Vendors</SelectItem>
+                        {vendors.map((vendor) => (
+                          <SelectItem key={vendor.id} value={vendor.id.toString()}>
+                            {vendor.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
               {/* Table or List of Software Licenses */}
