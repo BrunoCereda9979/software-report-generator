@@ -153,7 +153,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     };
 
-
     const updateSoftware = (newSoftwareList: Software[]) => {
         setSoftware(newSoftwareList);
     };
@@ -161,7 +160,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // CSV and EXCEL FILE GENERATION
     const generateCSV = (data: any[]) => {
         const headers = [
-            'id',
             'software_name',
             'software_description',
             'software_version',

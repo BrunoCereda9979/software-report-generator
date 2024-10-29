@@ -350,7 +350,7 @@ export default function Dashboard() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8"
                   />
-                  <div className="flex space-x-2 mt-3">
+                  <div className="flex items-center space-x-2 mt-3">
                     {/* Operational Status Filter */}
                     <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? undefined : value)}>
                       <SelectTrigger className="w-48">
@@ -362,7 +362,6 @@ export default function Dashboard() {
                         <SelectItem value="I">Inactive</SelectItem>
                       </SelectContent>
                     </Select>
-
                     {/* Department Filter */}
                     <Select
                       value={departmentFilter ? departmentFilter.toString() : "all"}
@@ -380,7 +379,6 @@ export default function Dashboard() {
                         ))}
                       </SelectContent>
                     </Select>
-
                     {/* Division Filter */}
                     <Select
                       value={divisionFilter ? divisionFilter.toString() : "all"}
@@ -469,7 +467,7 @@ export default function Dashboard() {
                               </TooltipProvider>
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="flex justify-center">
                             <span className={s.software_operational_status === "A" ? "text-green-600" : "text-red-600"}>
                               {s.software_operational_status === "A" ? "Active" : "Inactive"}
                             </span>
