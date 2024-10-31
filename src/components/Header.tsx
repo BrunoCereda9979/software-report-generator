@@ -1,6 +1,7 @@
 // components/Header.tsx
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { Bell, Mail } from 'lucide-react';
 
@@ -10,6 +11,32 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ isLoggedIn, setIsLoggedIn }) => {
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                },
+            });
+
+            if (response.ok) {
+                localStorage.removeItem('access_token');
+                setIsLoggedIn(false);
+                router.push('/authentication');
+            } else {
+                console.error('Logout failed');
+                // Optionally, show a message to the user
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+            // Optionally, show a message to the user
+        }
+    };
+
     return (
         <header className="bg-card shadow-sm sticky top-0 z-40">
             <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -21,8 +48,8 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, setIsLoggedIn }) => {
                     <Button variant="outline" size="icon">
                         <Mail className="h-4 w-4" />
                     </Button>
-                    <Button onClick={() => setIsLoggedIn(!isLoggedIn)}>
-                        {isLoggedIn ? 'Logout' : 'Login'}
+                    <Button onClick={isLoggedIn ? handleLogout : () => setIsLoggedIn(true)}>
+                        Logout
                     </Button>
                 </div>
             </div>

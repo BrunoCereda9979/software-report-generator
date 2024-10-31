@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Item, ContactPerson, Software, Comment } from '@/types/types';
+import { Item, ContactPerson, Software, Comment, User } from '@/types/types';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -34,6 +34,8 @@ interface GlobalState {
     updateSoftware: (newSoftwareList: Software[]) => void;
     generateCSV: (data: any[]) => string;
     downloadCSV: (csv: string, filename: string) => void;
+    currentUser: User | null;
+    setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const GlobalContext = createContext<GlobalState | undefined>(undefined);
@@ -54,6 +56,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [selectedSoftware, setSelectedSoftware] = useState<Software | undefined>(undefined);
     const [editingSoftware, setEditingSoftware] = useState<Software | undefined>(undefined);
     const [filteredSoftwareList, setFilteredSoftwareList] = useState<Software[]>([]);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
 
     const deleteComment = (commentId: number) => {
         setComments((prevComments) => prevComments.filter((comment) => comment.id !== commentId));
@@ -101,6 +104,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         };
 
         fetchData();
+    }, []);
+
+    // Fetch the current user from JWT in local storage
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            setCurrentUser(decodedToken);
+        }
     }, []);
 
     const handleAddSoftware = () => {
@@ -262,6 +274,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             updateSoftware,
             generateCSV,
             downloadCSV,
+            currentUser,
+            setCurrentUser,
         }}>
             {children}
         </GlobalContext.Provider>

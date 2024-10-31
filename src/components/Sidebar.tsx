@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChevronLeft, ChevronRight, Home, Settings, HelpCircle } from 'lucide-react';
+import { useGlobalContext } from '@/context/GlobalContext';
 
 interface SidebarProps {
     isMenuOpen: boolean;
@@ -16,6 +17,8 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser }) => {
+    const { currentUser } = useGlobalContext()
+    
     return (
         <div
             className={`fixed left-0 top-0 h-full bg-card shadow-md transition-all duration-300 z-50 ${isMenuOpen ? 'w-64' : 'w-20'
@@ -28,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser }) =
                         <AvatarFallback>{mockUser.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <h3 className="font-semibold">{mockUser.name}</h3>
+                        <h3 className="font-semibold">{currentUser?.first_name + ' ' + currentUser?.last_name}</h3>
                         <p className="text-sm text-muted-foreground">{mockUser.position}</p>
                     </div>
                 </div>

@@ -123,6 +123,15 @@ interface NewSoftware {
   software_annual_amount?: number;
 }
 
+interface User {
+  user_id: number
+  username: string
+  email: string
+  first_name: string
+  last_name: string
+  exp: number
+}
+
 interface Comment {
   id: number;
   user_id: number;
@@ -180,6 +189,7 @@ export type {
   CommentUpdate,
   ApiError,
   ApiResponse,
-  Item
+  Item,
+  User
 };
 

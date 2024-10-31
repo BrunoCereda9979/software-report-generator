@@ -66,7 +66,7 @@ import SoftwareComments from "@/components/SoftwareComments";
 import Context from "@/components/Context";
 
 const mockUser = {
-  name: "cereda",
+  name: `"cereda"`,
   position: "Technology Intern",
   avatar: "https://github.com/shadcn.png"
 }
@@ -90,6 +90,7 @@ export default function Dashboard() {
     updateSoftware,
     generateCSV,
     downloadCSV,
+    currentUser
   } = useGlobalContext();
   const [softwareToDelete, setSoftwareToDelete] = useState<Software | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -103,8 +104,8 @@ export default function Dashboard() {
   const [vendorFilter, setVendorFilter] = useState<number | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(0);
   const [newComment, setNewComment] = useState<CommentToAdd>({
-    user_id: 1,
-    user_name: "cereda",
+    user_id: currentUser?.user_id,
+    user_name: currentUser?.username,
     software_id: selectedSoftware?.id,
     content: '',
     satisfaction_rate: 5,
@@ -127,8 +128,8 @@ export default function Dashboard() {
   useEffect(() => {
     software.forEach(s => {
       if (isExpirationClose(s.software_expiration_date)) {
-        showNotification(`${s.software_name} is expiring soon!`)
-        sendEmailAlert(`${s.software_name} is expiring on ${format(s.software_expiration_date, 'yyyy-MM-dd')}`)
+        // showNotification(`${s.software_name} is expiring soon!`)
+        // sendEmailAlert(`${s.software_name} is expiring on ${format(s.software_expiration_date, 'yyyy-MM-dd')}`)
       }
     })
   }, [software])
@@ -149,7 +150,7 @@ export default function Dashboard() {
         throw new Error(`Failed to delete: ${response.statusText}`);
       }
 
-      toast(`${softwareToDelete.software_name} was deleted successfully.`);
+      toast.success(`${softwareToDelete.software_name} was deleted successfully.`);
 
       const fetchResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software`);
 
@@ -186,6 +187,8 @@ export default function Dashboard() {
       const commentPayload = {
         ...newComment,
         software_id: selectedSoftware.id,
+        user_id: currentUser?.user_id,
+        user_name: currentUser?.username
       };
 
       const response = await fetch(`http://127.0.0.1:8000/api/v1/comments/`, {
@@ -211,8 +214,8 @@ export default function Dashboard() {
       setComments(updatedComments);
 
       setNewComment({
-        user_id: 1,
-        user_name: "cereda",
+        user_id: currentUser?.user_id,
+        user_name: currentUser?.username,
         software_id: selectedSoftware?.id,
         content: '',
         satisfaction_rate: 5,
@@ -287,8 +290,14 @@ export default function Dashboard() {
   const displayedSoftware = filteredSoftware.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
 
   const handleExportAll = () => {
-    const csv = generateCSV(displayedSoftware);
-    downloadCSV(csv, 'all_software.csv');
+    if (divisionFilter || departmentFilter || vendorFilter || statusFilter) {
+      const csv = generateCSV(displayedSoftware);
+      downloadCSV(csv, 'all_software.csv');
+    }
+    else{
+      const csv = generateCSV(software);
+      downloadCSV(csv, 'all_software.csv');
+    }
   }
 
   const handleExportIndividual = (s: Software) => {

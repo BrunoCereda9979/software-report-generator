@@ -127,7 +127,6 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
         }
     };
 
-
     const handleRegisterNewContactToApi = async () => {
         try {
             if (newContact.contact_name && newContact.contact_lastname && newContact.contact_email && newContact.contact_phone_number) {
