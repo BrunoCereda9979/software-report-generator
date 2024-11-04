@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { Bell, Mail } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface HeaderProps {
     isLoggedIn: boolean;
@@ -27,13 +28,15 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, setIsLoggedIn }) => {
                 localStorage.removeItem('access_token');
                 setIsLoggedIn(false);
                 router.push('/authentication');
-            } else {
+                toast.success('Logged out')
+            } 
+            else {
                 console.error('Logout failed');
-                // Optionally, show a message to the user
+                throw new Error('Logout failed')
             }
         } catch (error) {
             console.error('Error logging out:', error);
-            // Optionally, show a message to the user
+            toast.error(error.message)
         }
     };
 

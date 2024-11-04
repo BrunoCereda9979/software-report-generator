@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useReducer } from 'react';
 import { Item, ContactPerson, Software, Comment, User } from '@/types/types';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -103,16 +103,17 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             }
         };
 
-        fetchData();
-    }, []);
+        const decodeAccessToken = () => {
+            const token = localStorage.getItem('access_token');
 
-    // Fetch the current user from JWT in local storage
-    useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            const decodedToken = JSON.parse(atob(token.split('.')[1]));
-            setCurrentUser(decodedToken);
+            if (token) {
+                const decodedToken = JSON.parse(atob(token.split('.')[1]));
+                setCurrentUser(decodedToken);
+            }
         }
+
+        fetchData();
+        decodeAccessToken();
     }, []);
 
     const handleAddSoftware = () => {

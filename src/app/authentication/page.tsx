@@ -30,8 +30,8 @@ export default function AuthComponent() {
     const handleAuth = async (event: React.FormEvent) => {
         event.preventDefault()
 
-        // Basic email validation regex
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        // Email validation regex for firstname.lastname@rockymountnc.gov format
+        const emailPattern = /^[a-zA-Z]+\.[a-zA-Z]+@rockymountnc\.gov$/
 
         if (activeTab === "register" && !emailPattern.test(formData.email)) {
             toast.error("Please enter a valid email address.")
@@ -67,34 +67,47 @@ export default function AuthComponent() {
 
             if (!response.ok) {
                 const errorData = await response.json()
-                if (response.status === 500) {
-                    toast.error("Internal Server Error. Please try again later.")
-                } 
-                else if (errorData.message === "Invalid credentials") {
-                    toast.error("Invalid credentials. Please check your email or password.")
-                } 
-                else {
-                    toast.error("An error occurred. Please try again.")
-                }
 
-                return
+                if (response.status === 500) {
+                    throw new Error("Internal Server Error. Please try again later.")
+                }
+                else if (errorData.code === "USERNAME_OR_EMAIL_NOT_FOUND") {
+                    throw new Error(`Invalid credentials. ${errorData.message}.`)
+                }
+                else if (errorData.code === "INCORRECT_PASSWORD") {
+                    throw new Error(`Invalid credentials. ${errorData.message}.`)
+                }
+                else if (errorData.code === "USERNAME_TAKEN") {
+                    throw new Error(`Invalid credentials. ${errorData.message}.`)
+                }
+                else if (errorData.code === "EMAIL_TAKEN") {
+                    throw new Error(`Invalid credentials. ${errorData.message}.`)
+                }
+                else if (errorData.code === "INVALID_EMAIL") {
+                    throw new Error(`Invalid credentials. ${errorData.message} (name.lastname@rockymountnc.gov).`)
+                }
+                else if (errorData.code === "PASSWORD_MISMATCH") {
+                    throw new Error(`Invalid credentials. ${errorData.message}.`)
+                }
+                else {
+                    throw new Error("An error occurred. Please try again.")
+                }
             }
 
             const data = await response.json()
-            
-            // Store the access token in local storage upon successful login
+
             if (activeTab === "login") {
-                localStorage.setItem("access_token", data.access_token)
                 toast.success("Login successful!")
-                router.push('/')
-            } 
+            }
             else {
                 toast.success("Registration successful!")
-                // Optionally handle post-registration logic here
             }
-        } 
+
+            localStorage.setItem("access_token", data.access_token)
+            router.push('/')
+        }
         catch (error) {
-            toast.error("An unexpected error occurred. Please check your network and try again.")
+            toast.error(`${error.message}`)
         }
     }
 
