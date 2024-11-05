@@ -1,7 +1,6 @@
 "use client"
 
 import Dashboard from "@/components/Dashboard";
-// import { Toaster } from "@/components/ui/sonner";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -18,7 +17,6 @@ export default function Home() {
 
   return (
     <main className="container mx-auto p-4">
-      {/* <Toaster /> */}
       <Dashboard />
     </main>
   );

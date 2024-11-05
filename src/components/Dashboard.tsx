@@ -184,26 +184,35 @@ export default function Dashboard() {
     }
 
     try {
+      const token = localStorage.getItem('access_token');
+
       const commentPayload = {
         ...newComment,
         software_id: selectedSoftware.id,
         user_id: currentUser?.user_id,
-        user_name: currentUser?.username
+        user_name: currentUser?.username,
       };
 
       const response = await fetch(`http://127.0.0.1:8000/api/v1/comments/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(commentPayload),
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Add comment error details:', errorData);
         throw new Error('Failed to add comment');
       }
 
-      const commentsResponse = await fetch(`http://127.0.0.1:8000/api/v1/software/${selectedSoftware.id}/comments`);
+      const commentsResponse = await fetch(`http://127.0.0.1:8000/api/v1/software/${selectedSoftware.id}/comments`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
       if (!commentsResponse.ok) {
         throw new Error('Failed to fetch updated comments');
@@ -224,12 +233,12 @@ export default function Dashboard() {
       });
 
       toast.success('Comment added successfully!');
-    }
-    catch (error) {
+    } catch (error) {
+      toast.error('Could not add new comment. Please try again later'); // Show error toast
       console.error('Error adding comment:', error);
-      toast.error('Could not add new comment. Please try again later');
     }
   };
+
 
   const isExpirationClose = (date: string) => {
     const daysUntilExpiration = differenceInDays(new Date(date), new Date())
@@ -252,21 +261,21 @@ export default function Dashboard() {
     setSortConfig({ key, direction });
   }
 
-  const sortedSoftware = useMemo(() => {
-    let sortableItems = [...software];
-    if (sortConfig.key !== null) {
-      sortableItems.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableItems;
-  }, [software, sortConfig]);
+  // const sortedSoftware = useMemo(() => {
+  //   let sortableItems = [...software];
+  //   if (sortConfig.key !== null) {
+  //     sortableItems.sort((a, b) => {
+  //       if (a[sortConfig.key] < b[sortConfig.key]) {
+  //         return sortConfig.direction === 'ascending' ? -1 : 1;
+  //       }
+  //       if (a[sortConfig.key] > b[sortConfig.key]) {
+  //         return sortConfig.direction === 'ascending' ? 1 : -1;
+  //       }
+  //       return 0;
+  //     });
+  //   }
+  //   return sortableItems;
+  // }, [software, sortConfig]);
 
   const filteredSoftware = useMemo(() => {
     return software.filter((s) => {
@@ -294,7 +303,7 @@ export default function Dashboard() {
       const csv = generateCSV(displayedSoftware);
       downloadCSV(csv, 'all_software.csv');
     }
-    else{
+    else {
       const csv = generateCSV(software);
       downloadCSV(csv, 'all_software.csv');
     }

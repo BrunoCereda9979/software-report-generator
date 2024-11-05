@@ -9,16 +9,19 @@ interface SoftwareCommentsProps {
 }
 
 const SoftwareComments: React.FC<SoftwareCommentsProps> = ({ softwareId }) => {
-    const { comments, deleteComment } = useGlobalContext();
+    const { comments, deleteComment, currentUser } = useGlobalContext();
 
     const filteredComments = comments.filter(comment => comment.software_id === softwareId);
 
     const handleDelete = async (commentId: number) => {
         try {
+            const token = localStorage.getItem('access_token');
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
             });
 
@@ -29,10 +32,10 @@ const SoftwareComments: React.FC<SoftwareCommentsProps> = ({ softwareId }) => {
             }
 
             deleteComment(commentId);
-            toast.success('Comment deleted successfully!')
-        }
+            toast.success('Comment deleted');
+        } 
         catch (error) {
-            toast.error('Could not delete comment. Please try again later.')
+            toast.error('Could not delete comment. Please try again later.');
             console.error('Error deleting comment:', error);
         }
     };
@@ -55,14 +58,16 @@ const SoftwareComments: React.FC<SoftwareCommentsProps> = ({ softwareId }) => {
                                     </p>
                                 </div>
 
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleDelete(comment.id)}
-                                    className="ml-4"
-                                >
-                                    Delete
-                                </Button>
+                                {comment.user_id === currentUser?.user_id ?
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDelete(comment.id)}
+                                        className="ml-4"
+                                    >
+                                        Delete
+                                    </Button> : ''
+                                }
                             </div>
                         ))
                     )}

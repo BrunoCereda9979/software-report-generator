@@ -1,9 +1,16 @@
+import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronLeft, ChevronRight, Home, Settings, HelpCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, HelpCircle, ChartNoAxesCombinedIcon } from 'lucide-react';
 import { useGlobalContext } from '@/context/GlobalContext';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface SidebarProps {
     isMenuOpen: boolean;
@@ -17,7 +24,8 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser }) => {
     const { currentUser } = useGlobalContext()
-    
+    const router = useRouter()
+
     return (
         <div
             className={`fixed left-0 top-0 h-full bg-card shadow-md transition-all duration-300 z-50 ${isMenuOpen ? 'w-64' : 'w-20'
@@ -41,18 +49,45 @@ const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser }) =
             <Separator />
             <ScrollArea className="h-[calc(100vh-80px)]">
                 <div className="p-4 space-y-2">
-                    <Button variant="ghost" className="w-full justify-start">
-                        <Home className="mr-2 h-4 w-4" />
-                        {isMenuOpen && <span>Dashboard</span>}
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start">
-                        <Settings className="mr-2 h-4 w-4" />
-                        {isMenuOpen && <span>Settings</span>}
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start">
-                        <HelpCircle className="mr-2 h-4 w-4" />
-                        {isMenuOpen && <span>Help</span>}
-                    </Button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" className="w-full justify-start" onClick={() => router.push('/')}>
+                                    <Home className="mr-2 h-4 w-4" />
+                                    {isMenuOpen && <span>Dashboard</span>}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                Dashboard
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" className="w-full justify-start" onClick={() => router.push('analytics')}>
+                                    <ChartNoAxesCombinedIcon className="mr-2 h-4 w-4" />
+                                    {isMenuOpen && <span>Analytics</span>}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                Analytics
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" className="w-full justify-start">
+                                    <HelpCircle className="mr-2 h-4 w-4" />
+                                    {isMenuOpen && <span>Help</span>}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                Help
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </ScrollArea>
         </div>
