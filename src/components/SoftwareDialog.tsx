@@ -119,7 +119,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
             updateSoftware(updatedSoftwareList);
 
             onClose(); // Close the dialog
-            toast.success(mode === 'add' ? 'Software created successfully' : 'Software updated successfully');
+            toast.success(mode === 'add' ? 'Software added' : 'Software updated');
         }
         catch (error) {
             console.error('Error saving software:', error);

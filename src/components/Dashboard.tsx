@@ -239,7 +239,6 @@ export default function Dashboard() {
     }
   };
 
-
   const isExpirationClose = (date: string) => {
     const daysUntilExpiration = differenceInDays(new Date(date), new Date())
     return daysUntilExpiration <= 30
@@ -318,14 +317,19 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background text-foreground">
       <Context />
       <div className="min-h-screen flex">
-        <Sidebar mockUser={mockUser} toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} />
+        <Sidebar mockUser={mockUser} toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
         <div className={`flex-1 overflow-auto transition-all duration-300 ${isMenuOpen ? 'ml-64' : 'ml-20'}`}>
-          <Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+          {/* <Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} /> */}
           <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <div className="px-4 py-6 sm:px-0">
               {/* Actions Bar */}
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Software List</h2>
+                <div>
+                  <h2 className="text-3xl font-bold tracking-tight">Software List</h2>
+                  <p className="text-muted-foreground">
+                    Overview of all the sofware used in the city
+                  </p>
+                </div>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
                     <Button

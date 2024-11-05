@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronLeft, ChevronRight, Home, HelpCircle, ChartNoAxesCombinedIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, HelpCircle, ChartNoAxesCombinedIcon, LogOut } from 'lucide-react';
 import { useGlobalContext } from '@/context/GlobalContext';
 import {
     Tooltip,
@@ -11,6 +11,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { toast } from 'sonner';
 
 interface SidebarProps {
     isMenuOpen: boolean;
@@ -20,11 +21,40 @@ interface SidebarProps {
         name: string;
         position: string;
     };
+    isLoggedIn: boolean;
+    setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser, isLoggedIn, setIsLoggedIn }) => {
     const { currentUser } = useGlobalContext()
     const router = useRouter()
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                },
+            });
+
+            if (response.ok) {
+                localStorage.removeItem('access_token');
+                setIsLoggedIn(false);
+                router.push('/authentication');
+                toast.success('Logged out')
+            }
+            else {
+                console.error('Logout failed');
+                throw new Error('Logout failed')
+            }
+        }
+        catch (error) {
+            console.error('Error logging out:', error);
+            toast.error(error.message)
+        }
+    };
 
     return (
         <div
@@ -78,13 +108,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser }) =
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button variant="ghost" className="w-full justify-start">
-                                    <HelpCircle className="mr-2 h-4 w-4" />
-                                    {isMenuOpen && <span>Help</span>}
+                                <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    {isMenuOpen && <span>Log Out</span>}
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                Help
+                                Log Out
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>

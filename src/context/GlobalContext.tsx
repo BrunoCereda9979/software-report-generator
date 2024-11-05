@@ -1,9 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useReducer } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Item, ContactPerson, Software, Comment, User } from '@/types/types';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useRouter } from "next/navigation"
 
 interface GlobalState {
     software: Software[];
@@ -130,11 +131,19 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const handleSaveSoftware = async (softwareToSave: Software) => {
         try {
+            const token = localStorage.getItem('access_token');
+
+            if (!token) throw new Error('User is not authenticated');
+
             let response;
+
             if (dialogMode === 'add') {
                 response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`, 
+                    },
                     body: JSON.stringify(softwareToSave),
                 });
 
@@ -146,7 +155,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             else {
                 response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software/${softwareToSave.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`, 
+                    },
                     body: JSON.stringify(softwareToSave),
                 });
 
@@ -154,11 +166,11 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
                 const updatedSoftware = await response.json();
                 setSoftware(prevSoftware => prevSoftware.map(s => s.id === updatedSoftware.id ? updatedSoftware : s));
-                toast.success('Software updated successfully!');
             }
 
             setIsDialogOpen(false);
-            return response; // Return the response object
+
+            return response;
         }
         catch (error) {
             console.error('Error saving software:', error);
