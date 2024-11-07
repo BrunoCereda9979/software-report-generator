@@ -2,9 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Item, ContactPerson, Software, Comment, User } from '@/types/types';
-import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { useRouter } from "next/navigation"
 
 interface GlobalState {
     software: Software[];
@@ -165,6 +163,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 if (!response.ok) throw new Error('Failed to update software');
 
                 const updatedSoftware = await response.json();
+
                 setSoftware(prevSoftware => prevSoftware.map(s => s.id === updatedSoftware.id ? updatedSoftware : s));
             }
 

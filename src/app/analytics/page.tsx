@@ -1,7 +1,8 @@
 "use client"
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import { ArrowDown, ArrowUp, DollarSign, Download, Package2, Smile, ThumbsDown, ThumbsUp } from "lucide-react"
+import { ArrowDown, ArrowUp, DollarSign, Download, Package2, Smile, ThumbsDown, ThumbsUp, Meh } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
@@ -15,6 +16,7 @@ const mockUser = {
 }
 
 export default function Analytics() {
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(true);
     const [analyticsData, setAnalyticsData] = useState({
@@ -125,6 +127,32 @@ export default function Analytics() {
             }
         };
 
+        const checkTokenExpiration = () => {
+            try {
+                const token = localStorage.getItem("access_token");
+
+                if (!token) {
+                    router.push("/authentication");
+                    toast.error("Your session expired. Please log in again.")
+                    return;
+                }
+                
+                const { exp } = JSON.parse(atob(token.split(".")[1]));
+                const isExpired = Date.now() >= exp * 1000;
+
+                if (isExpired) {
+                    localStorage.removeItem("access_token");
+                    router.push("/authentication");
+                    toast.error("Your session expired. Please log in again.")
+                }
+            }
+            catch (error) {
+                console.error("Failed to decode token:", error);
+                router.push("/authentication");
+            }
+        }
+
+        checkTokenExpiration();
         fetchAnalytics();
     }, []);
 
@@ -134,7 +162,6 @@ export default function Analytics() {
                 <Sidebar mockUser={mockUser} toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
                 <div className={`flex-1 overflow-auto transition-all duration-300 ${isMenuOpen ? 'ml-64' : 'ml-20'}`}>
                     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                        {/* <Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/> */}
                         <div className="flex items-center justify-between space-y-2 p-8">
                             <div>
                                 <h2 className="text-3xl font-bold tracking-tight">Software Analytics</h2>
@@ -168,11 +195,17 @@ export default function Analytics() {
                                         <CardTitle className="text-sm font-medium">
                                             Average Satisfaction Rate
                                         </CardTitle>
-                                        <Smile className="h-4 w-4 text-muted-foreground" />
+                                        {
+                                            analyticsData.averageSatisfaction > 7 
+                                            ?
+                                            <Smile className="h-4 w-4 text-muted-foreground" /> 
+                                            : 
+                                            <Meh className="h-4 w-4 text-muted-foreground" /> 
+                                        }
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold">{analyticsData.averageSatisfaction}/5.0</div>
-                                        <Progress value={analyticsData.averageSatisfaction * 20} className="mt-2" />
+                                        <div className="text-2xl font-bold">{analyticsData.averageSatisfaction}/10</div>
+                                        <Progress value={Math.round(analyticsData.averageSatisfaction / 10 * 100)} className="mt-2" />
                                     </CardContent>
                                 </Card>
                                 <Card>

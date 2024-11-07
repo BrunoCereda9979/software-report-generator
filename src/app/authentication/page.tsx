@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useGlobalContext } from '@/context/GlobalContext'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,8 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Toaster, toast } from "sonner"
 
 export default function AuthComponent() {
-    const router = useRouter();
-
+    const router = useRouter()
+    const { setCurrentUser } = useGlobalContext()
     const [activeTab, setActiveTab] = useState("login")
     const [formData, setFormData] = useState({
         emailOrUsername: "",
@@ -104,9 +105,17 @@ export default function AuthComponent() {
             }
 
             localStorage.setItem("access_token", data.access_token)
+
+            const token = localStorage.getItem('access_token');
+
+            if (token) {
+                const decodedToken = JSON.parse(atob(token.split('.')[1]));
+                setCurrentUser(decodedToken);
+            }
+
             router.push('/')
         }
-        catch (error) {
+        catch (error: any) {
             toast.error(`${error.message}`)
         }
     }

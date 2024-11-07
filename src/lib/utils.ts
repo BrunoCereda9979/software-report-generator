@@ -13,7 +13,7 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 interface FetchOptions extends Omit<RequestInit, 'method' | 'body'> {
   method: HttpMethod;
   headers?: Record<string, string>;
-  body?: Record<string, any>;  // Changed from 'object' to be more specific
+  body?: Record<string, any>;
 }
 
 export async function fetchApi<T>(
@@ -51,11 +51,17 @@ export async function fetchApi<T>(
     }
 
     return { data, error: null };
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('API call failed:', error);
     return {
       data: null,
       error: error instanceof Error ? error.message : 'An unknown error occurred',
     };
   }
+}
+
+export function getAuthToken(): string | null {
+  // Retrieve the JWT from local storage, cookies, or your preferred storage
+  return localStorage.getItem("access_token");
 }

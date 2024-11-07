@@ -59,7 +59,6 @@ import { format, differenceInDays } from "date-fns"
 import { Software, CommentToAdd } from "@/types/types"
 import SoftwareDialog from "./SoftwareDialog";
 import Sidebar from "./Sidebar"
-import Header from "./Header"
 import Pagination from "./Pagination";
 import { YesNoIndicator } from "./YesNoIndicator";
 import SoftwareComments from "@/components/SoftwareComments";
@@ -137,6 +136,14 @@ export default function Dashboard() {
   const handleRemoveSoftware = async (softwareToDelete: Software) => {
     if (!softwareToDelete) return;
 
+    // Get the access token from cache
+    const accessToken = localStorage.getItem('access_token');
+
+    if (!accessToken) {
+      toast.error("No access token found. Please log in again.")
+      return;
+    }
+
     const updatedSoftware = software.filter((s) => s.id !== softwareToDelete.id);
 
     updateSoftware(updatedSoftware);
@@ -144,7 +151,15 @@ export default function Dashboard() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software/${softwareToDelete.id}`, {
         method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
+
+      if (response.status === 401) {
+        toast.error('Your session expired. Please Log In again.')
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to delete: ${response.statusText}`);
@@ -315,11 +330,10 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Context />
+      {/* <Context /> */}
       <div className="min-h-screen flex">
         <Sidebar mockUser={mockUser} toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
         <div className={`flex-1 overflow-auto transition-all duration-300 ${isMenuOpen ? 'ml-64' : 'ml-20'}`}>
-          {/* <Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} /> */}
           <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <div className="px-4 py-6 sm:px-0">
               {/* Actions Bar */}

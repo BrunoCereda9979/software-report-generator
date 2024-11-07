@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, setIsLoggedIn }) => {
                 throw new Error('Logout failed')
             }
         } 
-        catch (error) {
+        catch (error: any) {
             console.error('Error logging out:', error);
             toast.error(error.message)
         }

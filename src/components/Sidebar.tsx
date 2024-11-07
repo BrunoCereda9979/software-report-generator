@@ -1,3 +1,5 @@
+"use client"
+
 import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -50,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser, isL
                 throw new Error('Logout failed')
             }
         }
-        catch (error) {
+        catch (error: any) {
             console.error('Error logging out:', error);
             toast.error(error.message)
         }
@@ -69,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser, isL
                     </Avatar>
                     <div>
                         <h3 className="font-semibold">{currentUser?.first_name + ' ' + currentUser?.last_name}</h3>
-                        <p className="text-sm text-muted-foreground">{mockUser.position}</p>
+                        <p className="text-sm text-muted-foreground">@{currentUser?.username}</p>
                     </div>
                 </div>
                 <Button variant="ghost" size="icon" onClick={toggleMenu}>
