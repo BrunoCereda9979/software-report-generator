@@ -133,7 +133,6 @@ export default function Analytics() {
 
                 if (!token) {
                     router.push("/authentication");
-                    toast.error("Your session expired. Please log in again.")
                     return;
                 }
                 
@@ -184,7 +183,7 @@ export default function Analytics() {
                                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold">${analyticsData.totalSpending}</div>
+                                        <div className="text-2xl font-bold">${analyticsData.totalSpending}.00</div>
                                         <p className="text-xs text-muted-foreground">
                                             +2.5% from last month
                                         </p>

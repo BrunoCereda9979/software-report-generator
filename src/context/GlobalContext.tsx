@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Item, ContactPerson, Software, Comment, User } from '@/types/types';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { AlertCircle } from 'lucide-react';
 
 interface GlobalState {
     software: Software[];
@@ -104,7 +106,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         const decodeAccessToken = () => {
             const token = localStorage.getItem('access_token');
-
+            console.log('Access Token', token)
             if (token) {
                 const decodedToken = JSON.parse(atob(token.split('.')[1]));
                 setCurrentUser(decodedToken);
@@ -127,22 +129,57 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsDialogOpen(true);
     };
 
-    const handleSaveSoftware = async (softwareToSave: Software) => {
+    const handleSaveSoftware = async (softwareToSave: Software): Promise<Response> => {
         try {
             const token = localStorage.getItem('access_token');
 
             if (!token) throw new Error('User is not authenticated');
 
+            const filterInvalidEntries = <T extends { id: number; name: string }>(items: T[]): T[] => {
+                return items.filter(item => item.id !== -1 && item.name !== "");
+            };
+
+            const validateContactPeople = (contacts: ContactPerson[]): void => {
+                for (const contact of contacts) {
+                    if (
+                        !contact.contact_name?.trim() ||
+                        !contact.contact_lastname?.trim() ||
+                        !contact.contact_email?.trim() ||
+                        (contact.contact_phone_number === undefined || contact.contact_phone_number === "")
+                    ) {
+                        toast('Error Adding Software', {
+                            description: 'Please fill out the field for department contacts',
+                            icon: <AlertCircle className="mr-2 h-4 w-4" />
+                        })
+
+                        throw new Error("Validation failed for software_department_contact_people");
+                    }
+                }
+            };
+
+            validateContactPeople(softwareToSave.software_department_contact_people);
+
+            const filteredSoftware = {
+                ...softwareToSave,
+                software_department: filterInvalidEntries(softwareToSave.software_department),
+                software_divisions_using: filterInvalidEntries(softwareToSave.software_divisions_using),
+                software_vendor: filterInvalidEntries(softwareToSave.software_vendor),
+                hardware_to_operate: filterInvalidEntries(softwareToSave.hardware_to_operate),
+                software_to_operate: filterInvalidEntries(softwareToSave.software_to_operate),
+                software_gl_accounts: filterInvalidEntries(softwareToSave.software_gl_accounts),
+            };
+
             let response;
 
             if (dialogMode === 'add') {
+                console.log('SOFTWARE TO SAVE:', filteredSoftware);
                 response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software`, {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`, 
+                        'Authorization': `Bearer ${token}`,
                     },
-                    body: JSON.stringify(softwareToSave),
+                    body: JSON.stringify(filteredSoftware),
                 });
 
                 if (!response.ok) throw new Error('Failed to add software');
@@ -153,17 +190,16 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             else {
                 response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software/${softwareToSave.id}`, {
                     method: 'PUT',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`, 
+                        'Authorization': `Bearer ${token}`,
                     },
-                    body: JSON.stringify(softwareToSave),
+                    body: JSON.stringify(filteredSoftware),
                 });
 
                 if (!response.ok) throw new Error('Failed to update software');
 
                 const updatedSoftware = await response.json();
-
                 setSoftware(prevSoftware => prevSoftware.map(s => s.id === updatedSoftware.id ? updatedSoftware : s));
             }
 
@@ -176,6 +212,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             throw error;
         }
     };
+
 
     const updateSoftware = (newSoftwareList: Software[]) => {
         setSoftware(newSoftwareList);

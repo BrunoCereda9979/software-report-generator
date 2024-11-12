@@ -54,6 +54,7 @@ import {
   ArrowUpDown,
   FileDown,
   Search,
+  AlertCircle
 } from "lucide-react"
 import { format, differenceInDays } from "date-fns"
 import { Software, CommentToAdd } from "@/types/types"
@@ -62,7 +63,9 @@ import Sidebar from "./Sidebar"
 import Pagination from "./Pagination";
 import { YesNoIndicator } from "./YesNoIndicator";
 import SoftwareComments from "@/components/SoftwareComments";
+import { useRouter } from "next/navigation";
 import Context from "@/components/Context";
+import { Alert } from "./ui/alert";
 
 const mockUser = {
   name: `"cereda"`,
@@ -71,6 +74,8 @@ const mockUser = {
 }
 
 export default function Dashboard() {
+  const router = useRouter();
+
   const {
     software,
     divisions,
@@ -136,7 +141,6 @@ export default function Dashboard() {
   const handleRemoveSoftware = async (softwareToDelete: Software) => {
     if (!softwareToDelete) return;
 
-    // Get the access token from cache
     const accessToken = localStorage.getItem('access_token');
 
     if (!accessToken) {
@@ -158,14 +162,24 @@ export default function Dashboard() {
       });
 
       if (response.status === 401) {
-        toast.error('Your session expired. Please Log In again.')
+        toast('Session Expired', {
+          description: 'Your session expired. Please Log In again.',
+          icon: <AlertCircle className="mr-2 h-4 w-4"/>,
+          action: {
+            label: 'Log In',
+            onClick: () => { router.push('/authentication') }
+          }
+        })
       }
 
       if (!response.ok) {
         throw new Error(`Failed to delete: ${response.statusText}`);
       }
 
-      toast.success(`${softwareToDelete.software_name} was deleted successfully.`);
+      toast.success('Software Deleted', {
+        description: `${softwareToDelete.software_name.toUpperCase()} was deleted successfully.`,
+        icon: <AlertCircle className="mr-2 h-4 w-4"/>,
+      })
 
       const fetchResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software`);
 

@@ -9,11 +9,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Toaster, toast } from "sonner"
+import { AlertCircle, CheckCircle } from 'lucide-react'
+import Spinner from '@/components/Spinner'
 
 export default function AuthComponent() {
     const router = useRouter()
     const { setCurrentUser } = useGlobalContext()
     const [activeTab, setActiveTab] = useState("login")
+    const [isLoading, setIsLoading] = useState(false)
     const [formData, setFormData] = useState({
         emailOrUsername: "",
         password: "",
@@ -30,6 +33,7 @@ export default function AuthComponent() {
 
     const handleAuth = async (event: React.FormEvent) => {
         event.preventDefault()
+        setIsLoading(true)
 
         // Email validation regex for firstname.lastname@rockymountnc.gov format
         const emailPattern = /^[a-zA-Z]+\.[a-zA-Z]+@rockymountnc\.gov$/
@@ -97,13 +101,6 @@ export default function AuthComponent() {
 
             const data = await response.json()
 
-            if (activeTab === "login") {
-                toast.success("Login successful!")
-            }
-            else {
-                toast.success("Registration successful!")
-            }
-
             localStorage.setItem("access_token", data.access_token)
 
             const token = localStorage.getItem('access_token');
@@ -113,6 +110,18 @@ export default function AuthComponent() {
                 setCurrentUser(decodedToken);
             }
 
+            if (activeTab === "login") {
+                toast("Logged In", {
+                    icon: <CheckCircle className="mr-2 h-4 w-4" />,
+                })
+            }
+            else {
+                toast("Registered", {
+                    icon: <CheckCircle className="mr-2 h-4 w-4" />,
+                })
+            }
+
+            setIsLoading(false)
             router.push('/')
         }
         catch (error: any) {
@@ -144,7 +153,9 @@ export default function AuthComponent() {
                                         <Label htmlFor="password">Password</Label>
                                         <Input id="password" type="password" value={formData.password} onChange={handleChange} required />
                                     </div>
-                                    <Button type="submit" className="w-full">Log In</Button>
+                                    <Button type="submit" className="w-full" disabled={isLoading}>
+                                        {isLoading ? <><Spinner /> Loading...</> : 'Log In'}
+                                    </Button>
                                 </div>
                             </form>
                         </TabsContent>
@@ -177,7 +188,9 @@ export default function AuthComponent() {
                                         <Label htmlFor="confirmPassword">Confirm Password</Label>
                                         <Input id="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} required />
                                     </div>
-                                    <Button type="submit" className="w-full">Register</Button>
+                                    <Button type="submit" className="w-full" disabled={isLoading}>
+                                        {isLoading ? <><Spinner/> Loading...</> : 'Register'}
+                                    </Button>
                                 </div>
                             </form>
                         </TabsContent>

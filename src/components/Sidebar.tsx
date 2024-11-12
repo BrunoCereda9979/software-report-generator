@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronLeft, ChevronRight, Home, HelpCircle, ChartNoAxesCombinedIcon, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, CheckCircle, ChartNoAxesCombinedIcon, LogOut, AlertCircle } from 'lucide-react';
 import { useGlobalContext } from '@/context/GlobalContext';
 import {
     Tooltip,
@@ -45,7 +45,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMenuOpen, toggleMenu, mockUser, isL
                 localStorage.removeItem('access_token');
                 setIsLoggedIn(false);
                 router.push('/authentication');
-                toast.success('Logged out')
+                toast('Logged Out', {
+                    icon: <CheckCircle className="mr-2 h-4 w-4"/>,
+                })
             }
             else {
                 console.error('Logout failed');

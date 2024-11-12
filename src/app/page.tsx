@@ -4,6 +4,7 @@ import Dashboard from "@/components/Dashboard";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { AlertCircle } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -13,7 +14,16 @@ export default function Home() {
 
     if (!token) {
       router.push("/authentication");
-      toast.error("Your session expired. Please log in again.")
+
+      toast('Session Expired', {
+        description: 'Your session expired. Please Log In again.',
+        icon: <AlertCircle className="mr-2 h-4 w-4" />,
+        action: {
+          label: 'Log In',
+          onClick: () => { router.push('/authentication') }
+        }
+      })
+
       return;
     }
 
@@ -23,10 +33,19 @@ export default function Home() {
 
       if (isExpired) {
         localStorage.removeItem("access_token");
-        router.push("/authentication");
-        toast.error("Your session expired. Please log in again.")
+
+        // router.push("/authentication");
+
+        toast('Session Expired', {
+          description: 'Your session expired. Please Log In again.',
+          icon: <AlertCircle className="mr-2 h-4 w-4" />,
+          action: {
+            label: 'Log In',
+            onClick: () => { router.push('/authentication') }
+          }
+        })
       }
-    } 
+    }
     catch (error) {
       console.error("Failed to decode token:", error);
       router.push("/authentication");

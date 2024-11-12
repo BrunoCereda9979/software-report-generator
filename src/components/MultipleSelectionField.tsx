@@ -61,6 +61,7 @@ const MultipleSelectionField: React.FC<MultipleSelectionFieldProps> = ({
                 {localSelectedItems.map((item, index) => (
                     <div key={index} className="flex items-center gap-2">
                         <Select
+                            required
                             value={item.name || ''}
                             onValueChange={(value) => handleSelectItem(value, index)}
                         >

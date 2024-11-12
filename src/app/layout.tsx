@@ -2,13 +2,13 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { GlobalProvider } from '@/context/GlobalContext';
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Enhanced Software Dashboard',
-  description: 'Track and manage software used by the company',
+  title: 'Software Tracker',
+  description: 'Track and manage software used by the City Of Rocky Mount',
 };
 
 export default function RootLayout({

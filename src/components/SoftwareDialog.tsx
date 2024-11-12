@@ -1,11 +1,11 @@
 import { useGlobalContext } from "@/context/GlobalContext";
 import { useState, useEffect } from "react"
-import { 
-    Dialog, 
-    DialogContent, 
-    DialogHeader, 
-    DialogTitle, 
-    DialogFooter 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,21 +13,22 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { 
-    Select, 
-    SelectContent, 
-    SelectItem, 
-    SelectTrigger, 
-    SelectValue 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
 } from "@/components/ui/select"
-import { 
-    Software, 
-    NewSoftware, 
-    NewContactPerson 
+import {
+    Software,
+    NewSoftware,
+    NewContactPerson
 } from "@/types/types"
-import { PlusCircle, X, Plus } from "lucide-react"
+import { PlusCircle, X, Plus, CheckCircle, AlertCircle } from "lucide-react"
 import MultipleSelectionField from "./MultipleSelectionField"
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface SoftwareDialogProps {
     isOpen: boolean
@@ -38,6 +39,7 @@ interface SoftwareDialogProps {
 }
 
 export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software }: SoftwareDialogProps) {
+    const router = useRouter()
     const {
         divisions,
         departments,
@@ -118,11 +120,11 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
         e.preventDefault();
         try {
             const saveResponse = await onSave(newSoftware as Software);
-            
+
             if (!saveResponse.ok) {
                 throw new Error('Failed to create software');
             }
-            
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software`);
 
             if (!response.ok) {
@@ -131,26 +133,53 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
 
             const updatedSoftwareList = await response.json();
 
-            // Update the software state with the new list
             updateSoftware(updatedSoftwareList);
 
-            onClose(); // Close the dialog
-            toast.success(mode === 'add' ? 'Software added' : 'Software updated');
+            onClose();
+
+            if (mode === 'add') {
+                toast('New Software Added', {
+                    description: `${newSoftware.software_name} added successfully`,
+                    icon: <CheckCircle className="mr-2 h-4 w-4" />
+                })
+            }
+            else if (mode === 'edit') {
+                toast('Software Edited', {
+                    description: `${newSoftware.software_name} edited successfully`,
+                    icon: <CheckCircle className="mr-2 h-4 w-4" />
+                })
+            }
         }
         catch (error) {
             console.error('Error saving software:', error);
-            toast.error('Failed to save software. Please try again.');
         }
     };
 
     const handleRegisterNewContactToApi = async () => {
         try {
+            const accessToken = localStorage.getItem('access_token')
+
             if (newContact.contact_name && newContact.contact_lastname && newContact.contact_email && newContact.contact_phone_number) {
                 console.log(newContact)
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/contact-people`, {
                     method: "POST",
-                    body: JSON.stringify(newContact)
+                    body: JSON.stringify(newContact),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authenticate': `Bearer ${accessToken}`
+                    }
                 });
+
+                if (response.status === 401) {
+                    toast('Session Expired', {
+                        description: 'Your session expired. Please Log In again.',
+                        icon: <AlertCircle className="mr-2 h-4 w-4" />,
+                        action: {
+                            label: 'Log In',
+                            onClick: () => { router.push('/authentication') }
+                        }
+                    })
+                }
 
                 if (!response.ok) throw new Error(`Failed to fetch data from ${`${process.env.NEXT_PUBLIC_API_BASE_URL}/contact-person`}`);
 
@@ -327,19 +356,22 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                             </div>
                         </div>
                         {showRegisterNewContactForm && (
-                            <div className="grid grid-cols-4 place-items-center gap-1">
-                                <div className="col-span-4 space-y-2 w-[60%] p-4 border rounded-md">
+                            <div className="grid grid-cols-4 place-items-center gap-1 ml-[190px]">
+                                <div className="col-span-4 space-y-2 w-[523px] p-4 border rounded-md -ml-2">
                                     <Input
+                                        required
                                         placeholder="Name"
                                         value={newContact.contact_name}
                                         onChange={(e) => setNewContact({ ...newContact, contact_name: e.target.value })}
                                     />
                                     <Input
+                                        required
                                         placeholder="Lastname"
                                         value={newContact.contact_lastname}
                                         onChange={(e) => setNewContact({ ...newContact, contact_lastname: e.target.value })}
                                     />
                                     <Input
+                                        required
                                         type="email"
                                         placeholder="Email"
                                         value={newContact.contact_email}
@@ -348,6 +380,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                                         }
                                     />
                                     <Input
+                                        required
                                         placeholder="Phone"
                                         value={newContact.contact_phone_number}
                                         onChange={
@@ -452,7 +485,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                             </Select>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4 pt-1">
-                            <Label htmlFor="edit-isTechSupported" className="text-right">
+                            <Label htmlFor="is-tech-supported" className="text-right">
                                 Is Tech Supported
                             </Label>
                             <div className="col-span-3 flex items-center">
@@ -470,7 +503,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                             </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4 pt-1">
-                            <Label htmlFor="maintenance-support-contract" className="text-right">
+                            <Label htmlFor="software-is-cloud-based" className="text-right">
                                 Cloud Based
                             </Label>
                             <div className="col-span-3 flex items-center">
