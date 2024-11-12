@@ -97,6 +97,7 @@ interface Software {
   software_gl_accounts: GlAccount[];
   software_operational_status: string;
   software_annual_amount?: number;
+  software_annual_amount_detail?: string;
 }
 
 interface NewSoftware {
@@ -121,6 +122,7 @@ interface NewSoftware {
   software_gl_accounts: Item[];
   software_operational_status: string;
   software_annual_amount?: number;
+  software_annual_amount_detail?: string;
 }
 
 interface User {

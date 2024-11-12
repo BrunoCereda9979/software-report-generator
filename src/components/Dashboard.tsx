@@ -164,7 +164,7 @@ export default function Dashboard() {
       if (response.status === 401) {
         toast('Session Expired', {
           description: 'Your session expired. Please Log In again.',
-          icon: <AlertCircle className="mr-2 h-4 w-4"/>,
+          icon: <AlertCircle className="mr-2 h-4 w-4" />,
           action: {
             label: 'Log In',
             onClick: () => { router.push('/authentication') }
@@ -178,7 +178,7 @@ export default function Dashboard() {
 
       toast.success('Software Deleted', {
         description: `${softwareToDelete.software_name.toUpperCase()} was deleted successfully.`,
-        icon: <AlertCircle className="mr-2 h-4 w-4"/>,
+        icon: <AlertCircle className="mr-2 h-4 w-4" />,
       })
 
       const fetchResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software`);
@@ -648,12 +648,12 @@ export default function Dashboard() {
                         value={selectedSoftware.software_is_tech_supported}
                       />
                       <YesNoIndicator
-                        label="Maintenance Supported"
-                        value={selectedSoftware.software_maintenance_support}
-                      />
-                      <YesNoIndicator
                         label="Cloud Based"
                         value={selectedSoftware.software_is_cloud_based}
+                      />
+                      <YesNoIndicator
+                        label="Maintenance Supported"
+                        value={selectedSoftware.software_maintenance_support}
                       />
                       <p className="text-sm">Division/s: {selectedSoftware.software_divisions_using.map(dept => dept.name).join(', ')}</p>
                       <p className="text-sm">Department/s: {selectedSoftware.software_department.map(dept => dept.name).join(', ')}</p>
@@ -679,6 +679,7 @@ export default function Dashboard() {
                       }
                       <p className="text-sm">Number of Licenses: {selectedSoftware.software_number_of_licenses}</p>
                       <p className="text-sm">Annual Cost: {selectedSoftware.software_annual_amount ? '$' + selectedSoftware.software_annual_amount.toLocaleString() : <span className="text-gray-400 font-style: italic">Not Estimated</span>}</p>
+                      <p className="text-sm">Annual Cost Detail: {selectedSoftware.software_annual_amount_detail ? '$' + selectedSoftware.software_annual_amount_detail : <span className="text-gray-400 font-style: italic">No Details</span>}</p>
                       <p className="text-sm">
                         GL Account/s:
                         {

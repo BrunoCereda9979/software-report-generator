@@ -131,6 +131,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const handleSaveSoftware = async (softwareToSave: Software): Promise<Response> => {
         try {
+            console.log('SOFTWARE TO SAVE:', softwareToSave);
             const token = localStorage.getItem('access_token');
 
             if (!token) throw new Error('User is not authenticated');

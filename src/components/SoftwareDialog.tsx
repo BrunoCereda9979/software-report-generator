@@ -71,6 +71,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
         software_to_operate: [],
         hardware_to_operate: [],
         software_annual_amount: 0,
+        software_annual_amount_detail: '',
         software_gl_accounts: [],
         software_operational_status: ""
     })
@@ -106,6 +107,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                 software_to_operate: [],
                 hardware_to_operate: [],
                 software_annual_amount: 0,
+                software_annual_amount_detail: '',
                 software_gl_accounts: [],
                 software_operational_status: ""
             })
@@ -149,9 +151,38 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                     icon: <CheckCircle className="mr-2 h-4 w-4" />
                 })
             }
+
+            setNewSoftware({
+                software_name: "",
+                software_description: "",
+                software_department: [],
+                software_version: "",
+                software_years_of_use: 0,
+                software_last_updated: "",
+                software_expiration_date: "",
+                software_is_hosted: "",
+                software_is_tech_supported: "NO",
+                software_is_cloud_based: "",
+                software_maintenance_support: "NO",
+                software_vendor: [],
+                software_department_contact_people: [],
+                software_divisions_using: [],
+                software_comments: "",
+                software_number_of_licenses: 0,
+                software_to_operate: [],
+                hardware_to_operate: [],
+                software_annual_amount: 0,
+                software_annual_amount_detail: '',
+                software_gl_accounts: [],
+                software_operational_status: ""
+            })
         }
         catch (error) {
             console.error('Error saving software:', error);
+            toast('Error', {
+                description: `${error.message}`,
+                icon: <CheckCircle className="mr-2 h-4 w-4" />
+            })
         }
     };
 
@@ -419,11 +450,11 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="expirationDate" className="text-right">
+                            <Label htmlFor="expiration-date" className="text-right">
                                 Expiration Date
                             </Label>
                             <Input
-                                id="expirationDate"
+                                id="expiration-date"
                                 required
                                 type="date"
                                 value={newSoftware.software_expiration_date ? newSoftware.software_expiration_date.split('T')[0] : ''}
@@ -562,6 +593,19 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                                 value={newSoftware.software_annual_amount}
                                 onChange={(e) => setNewSoftware({ ...newSoftware, software_annual_amount: parseFloat(e.target.value) })}
                                 className="col-span-3"
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="annual-cost-detail" className="text-right">
+                                Annual Cost Detail
+                            </Label>
+                            <Textarea
+                                id="annual-cost-detail"
+                                value={newSoftware.software_annual_amount_detail}
+                                onChange={(e) => setNewSoftware({ ...newSoftware, software_annual_amount_detail: e.target.value })}
+                                className="col-span-3 max-h-[90px]"
+                                required
+                                placeholder="Annual Cost Detail"
                             />
                         </div>
                         <Separator className="my-4" />
