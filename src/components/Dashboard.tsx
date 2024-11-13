@@ -518,8 +518,24 @@ export default function Dashboard() {
                             )}
                           </TableCell>
                           <TableCell className="flex justify-center">
-                            <span className={s.software_operational_status === "A" ? "text-green-600" : "text-red-600"}>
-                              {s.software_operational_status === "A" ? "Active" : "Inactive"}
+                            <span
+                              className={
+                                s.software_operational_status === "A"
+                                  ? "text-green-600"
+                                  : s.software_operational_status === "I"
+                                    ? "text-red-600"
+                                    : s.software_operational_status === "AU"
+                                      ? "text-blue-600 ml-2"
+                                      : "text-gray-400 italic"
+                              }
+                            >
+                              {s.software_operational_status === "A"
+                                ? "Active"
+                                : s.software_operational_status === "I"
+                                  ? "Inactive"
+                                  : s.software_operational_status === "AU"
+                                    ? "Authorized"
+                                    : "Unknown"}
                             </span>
                           </TableCell>
                           <TableCell>
@@ -578,7 +594,7 @@ export default function Dashboard() {
                           </p>
                           <p className="mt-2 truncate">
                             Operational Status:
-                            <span className={s.software_operational_status === "A" ? "text-green-600 ml-2" : "text-red-600 ml-2"}>
+                            <span className={s.software_operational_status === "A" ? "text-green-800 ml-2" : "text-red-600 ml-2"}>
                               {s.software_operational_status === "A" ? "Active" : "Inactive"}
                             </span>
                           </p>
@@ -637,10 +653,27 @@ export default function Dashboard() {
                       </p>
                       <p className="text-sm">
                         Operational Status:
-                        <span className={selectedSoftware.software_operational_status === "A" ? "text-green-600 ml-2" : "text-red-600 ml-2"}>
-                          {selectedSoftware.software_operational_status === "A" ? "Active" : "Inactive"}
+                        <span
+                          className={
+                            selectedSoftware.software_operational_status === "A"
+                              ? "text-green-600 ml-2"
+                              : selectedSoftware.software_operational_status === "AU"
+                                ? "text-blue-600 ml-2"
+                                : selectedSoftware.software_operational_status === "I"
+                                  ? "text-red-600 ml-2"
+                                  : "text-gray-400 italic ml-2"
+                          }
+                        >
+                          {selectedSoftware.software_operational_status === "A"
+                            ? "Active"
+                            : selectedSoftware.software_operational_status === "I"
+                              ? "Inactive"
+                              : selectedSoftware.software_operational_status === "AU"
+                                ? "Authorized"
+                                : "Unknown"}
                         </span>
                       </p>
+
                       <p className="text-sm">Years of Use: {selectedSoftware.software_years_of_use}</p>
                       <p className="text-sm">Hosted: {selectedSoftware.software_is_hosted === 'INT' ? "Internally" : "Externally"}</p>
                       <YesNoIndicator

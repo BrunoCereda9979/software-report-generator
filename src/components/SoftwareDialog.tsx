@@ -474,7 +474,9 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                             </Label>
                             <Select
                                 value={newSoftware.software_operational_status}
-                                onValueChange={(value) => setNewSoftware({ ...newSoftware, software_operational_status: value as "Active" | "Inactive" })}
+                                onValueChange={(value) =>
+                                    setNewSoftware({ ...newSoftware, software_operational_status: value as "Active" | "Inactive" | "Authorized" })
+                                }
                             >
                                 <SelectTrigger className="col-span-3">
                                     <SelectValue placeholder="Select status" />
@@ -482,6 +484,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                                 <SelectContent>
                                     <SelectItem value="Active">Active</SelectItem>
                                     <SelectItem value="Inactive">Inactive</SelectItem>
+                                    <SelectItem value="Authorized">Authorized</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
