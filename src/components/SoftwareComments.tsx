@@ -1,14 +1,17 @@
-import { useEffect } from 'react';
 import { useGlobalContext } from '@/context/GlobalContext';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { AlertCircle, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface SoftwareCommentsProps {
     softwareId: number;
 }
 
 const SoftwareComments: React.FC<SoftwareCommentsProps> = ({ softwareId }) => {
+    const router = useRouter();
+
     const { comments, deleteComment, currentUser } = useGlobalContext();
 
     const filteredComments = comments.filter(comment => comment.software_id === softwareId);
@@ -25,18 +28,34 @@ const SoftwareComments: React.FC<SoftwareCommentsProps> = ({ softwareId }) => {
                 },
             });
 
+            if (response.status === 401) {
+                toast('Session Expired', {
+                    description: 'Your session expired. Please Log In again.',
+                    icon: <AlertCircle className="mr-2 h-4 w-4" />,
+                    action: {
+                        label: 'Log In',
+                        onClick: () => { router.push('/authentication') }
+                    },
+                    duration: 10000
+                })
+            }
+
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('Delete error details:', errorData);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             deleteComment(commentId);
-            toast.success('Comment deleted');
-        } 
-        catch (error) {
-            toast.error('Could not delete comment. Please try again later.');
-            console.error('Error deleting comment:', error);
+
+            toast("Comment Deleted", {
+                icon: <CheckCircle className="mr-2 h-4 w-4" />,
+            })
+        }
+        catch (error: any) {
+            toast('Error', {
+                description: `${error.message}`,
+                icon: <AlertCircle className="mr-2 h-4 w-4" />
+            })
         }
     };
 

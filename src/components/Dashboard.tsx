@@ -144,7 +144,16 @@ export default function Dashboard() {
     const accessToken = localStorage.getItem('access_token');
 
     if (!accessToken) {
-      toast.error("No access token found. Please log in again.")
+      toast('Session Expired', {
+        description: "No access token found. Please log in again.",
+        icon: <AlertCircle className="mr-2 h-4 w-4" />,
+        action: {
+          label: 'Log In',
+          onClick: () => { router.push('/authentication') }
+        },
+        duration: 10000
+      })
+
       return;
     }
 
@@ -168,8 +177,11 @@ export default function Dashboard() {
           action: {
             label: 'Log In',
             onClick: () => { router.push('/authentication') }
-          }
+          },
+          duration: 10000
         })
+
+        return
       }
 
       if (!response.ok) {
@@ -262,7 +274,8 @@ export default function Dashboard() {
       });
 
       toast.success('Comment added successfully!');
-    } catch (error) {
+    }
+    catch (error) {
       toast.error('Could not add new comment. Please try again later'); // Show error toast
       console.error('Error adding comment:', error);
     }

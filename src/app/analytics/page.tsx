@@ -2,12 +2,25 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import { ArrowDown, ArrowUp, DollarSign, Download, Package2, Smile, ThumbsDown, ThumbsUp, Meh } from "lucide-react"
+import {
+    ArrowDown,
+    ArrowUp,
+    DollarSign,
+    Download,
+    Package2,
+    ThumbsDown,
+    ThumbsUp,
+    Smile,
+    Meh,
+    Frown,
+    PartyPopper
+} from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { AlertCircle } from "lucide-react";
 
 const mockUser = {
     name: `"cereda"`,
@@ -96,15 +109,29 @@ export default function Analytics() {
         }
     }
 
+    const tokenIsExpired = (token: any) => {
+        try {
+            const { exp } = JSON.parse(atob(token.split(".")[1]));
+            const isExpired = Date.now() >= exp * 1000;
+
+            return isExpired;
+        }
+        catch (error) {
+            console.error("Failed to decode token:", error);
+        }
+    }
+
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
-                // Get the access token from cache
                 const accessToken = localStorage.getItem('access_token');
 
                 if (!accessToken) {
-                    toast.error("No access token found. Please log in again.")
-                    return;
+                    throw new Error("No valid session found. Please log in again.")
+                }
+
+                if (tokenIsExpired(accessToken)) {
+                    throw new Error('Your session is expired. Please log in again.')
                 }
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/analytics`, {
@@ -115,43 +142,21 @@ export default function Analytics() {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch analytics');
+                    throw new Error('Failed to fetch analytics. Please try again later.');
                 }
 
                 const data = await response.json();
                 setAnalyticsData(data);
             }
-            catch (err) {
-                toast.error("Error fetching the analytics. Please try again later.")
-                console.error('Error fetching analytics:', err);
+            catch (error: any) {
+                router.push('/authentication')
+
+                toast('Session Expired', {
+                    description: `${error.message}`,
+                    icon: <AlertCircle className="mr-2 h-4 w-4" />
+                })
             }
         };
-
-        const checkTokenExpiration = () => {
-            try {
-                const token = localStorage.getItem("access_token");
-
-                if (!token) {
-                    router.push("/authentication");
-                    return;
-                }
-                
-                const { exp } = JSON.parse(atob(token.split(".")[1]));
-                const isExpired = Date.now() >= exp * 1000;
-
-                if (isExpired) {
-                    localStorage.removeItem("access_token");
-                    router.push("/authentication");
-                    toast.error("Your session expired. Please log in again.")
-                }
-            }
-            catch (error) {
-                console.error("Failed to decode token:", error);
-                router.push("/authentication");
-            }
-        }
-
-        checkTokenExpiration();
         fetchAnalytics();
     }, []);
 
@@ -195,11 +200,15 @@ export default function Analytics() {
                                             Average Satisfaction Rate
                                         </CardTitle>
                                         {
-                                            analyticsData.averageSatisfaction > 7 
-                                            ?
-                                            <Smile className="h-4 w-4 text-muted-foreground" /> 
-                                            : 
-                                            <Meh className="h-4 w-4 text-muted-foreground" /> 
+                                            analyticsData.averageSatisfaction > 9 ? (
+                                                <PartyPopper className="h-4 w-4 text-muted-foreground" />
+                                            ) : analyticsData.averageSatisfaction > 7 ? (
+                                                <Smile className="h-4 w-4 text-muted-foreground" />
+                                            ) : analyticsData.averageSatisfaction >= 5 ? (
+                                                <Meh className="h-4 w-4 text-muted-foreground" />
+                                            ) : (
+                                                <Frown className="h-4 w-4 text-muted-foreground" />
+                                            )
                                         }
                                     </CardHeader>
                                     <CardContent>

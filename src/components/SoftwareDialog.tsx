@@ -177,12 +177,26 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                 software_operational_status: ""
             })
         }
-        catch (error) {
+        catch (error: any) {
             console.error('Error saving software:', error);
-            toast('Error', {
-                description: `${error.message}`,
-                icon: <CheckCircle className="mr-2 h-4 w-4" />
-            })
+            // TO-DO: FIX THIS HORRIBLE WAY OF HANDLING ERRORS
+            if (error.message === 'Your session expired. Please log in again.') {
+                toast('Session Expired', {
+                    description: `${error.message}`,
+                    icon: <AlertCircle className="mr-2 h-4 w-4" />,
+                    action: {
+                        label: 'Log In',
+                        onClick: () => { router.push('/authentication') }
+                    },
+                    duration: 10000
+                })
+            }
+            else {
+                toast('Error', {
+                    description: `${error.message}`,
+                    icon: <CheckCircle className="mr-2 h-4 w-4" />
+                })
+            }
         }
     };
 
@@ -585,6 +599,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                                 className="col-span-3"
                             />
                         </div>
+                        {/* <Separator className="my-4" /> */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="annualCost" className="text-right">
                                 Annual Cost
@@ -607,7 +622,6 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                                 value={newSoftware.software_annual_amount_detail}
                                 onChange={(e) => setNewSoftware({ ...newSoftware, software_annual_amount_detail: e.target.value })}
                                 className="col-span-3 max-h-[90px]"
-                                required
                                 placeholder="Annual Cost Detail"
                             />
                         </div>

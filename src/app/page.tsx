@@ -38,7 +38,11 @@ export default function Home() {
 
         toast('Session Expired', {
           description: 'Your session expired. Please Log In again.',
-          icon: <AlertCircle className="mr-2 h-4 w-4" />
+          icon: <AlertCircle className="mr-2 h-4 w-4" />,
+          action: {
+            label: 'Log In',
+            onClick: () => { router.push('/authentication') }
+          }
         })
       }
     }

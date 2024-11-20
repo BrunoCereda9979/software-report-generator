@@ -131,7 +131,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const handleSaveSoftware = async (softwareToSave: Software): Promise<Response> => {
         try {
-            console.log('SOFTWARE TO SAVE:', softwareToSave);
             const token = localStorage.getItem('access_token');
 
             if (!token) throw new Error('User is not authenticated');
@@ -173,7 +172,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             let response;
 
             if (dialogMode === 'add') {
-                console.log('SOFTWARE TO SAVE:', filteredSoftware);
                 response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software`, {
                     method: 'POST',
                     headers: {
@@ -183,12 +181,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     body: JSON.stringify(filteredSoftware),
                 });
 
+                if (response.status === 401) throw new Error('Your session expired. Please log in again.')
+                    
                 if (!response.ok) throw new Error('Failed to add software');
 
                 const newSoftware = await response.json();
                 setSoftware(prevSoftware => [...prevSoftware, newSoftware]);
             }
             else {
+                console.log('EDITING SOFTWARE:', filteredSoftware)
                 response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software/${softwareToSave.id}`, {
                     method: 'PUT',
                     headers: {
@@ -198,9 +199,12 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     body: JSON.stringify(filteredSoftware),
                 });
 
+                if (response.status === 401) throw new Error('Your session expired. Please log in again.')
+
                 if (!response.ok) throw new Error('Failed to update software');
 
                 const updatedSoftware = await response.json();
+
                 setSoftware(prevSoftware => prevSoftware.map(s => s.id === updatedSoftware.id ? updatedSoftware : s));
             }
 
