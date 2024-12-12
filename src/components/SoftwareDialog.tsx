@@ -401,7 +401,7 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                             </div>
                         </div>
                         {showRegisterNewContactForm && (
-                            <div className="grid grid-cols-4 place-items-center gap-1 ml-[190px]">
+                            <form onSubmit={handleRegisterNewContactToApi} className="grid grid-cols-4 place-items-center gap-1 ml-[190px]">
                                 <div className="col-span-4 space-y-2 w-[523px] p-4 border rounded-md -ml-2">
                                     <Input
                                         required
@@ -436,12 +436,12 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                                         <Button type="button" variant="outline" onClick={handleNewContactCancel}>
                                             Cancel
                                         </Button>
-                                        <Button type="button" onClick={handleRegisterNewContactToApi}>
+                                        <Button type="submit">
                                             Add Contact
                                         </Button>
                                     </div>
                                 </div>
-                            </div>
+                            </form>
                         )}
                         <Separator className="my-4" />
                         <div className="grid grid-cols-4 items-center gap-4">

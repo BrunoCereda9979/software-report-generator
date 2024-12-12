@@ -12,12 +12,12 @@ import { Toaster, toast } from "sonner"
 import { AlertCircle, CheckCircle } from 'lucide-react'
 import Spinner from '@/components/Spinner'
 
-// Password validation hook
 interface PasswordValidation {
     isValid: boolean;
     errors: string[];
 }
 
+// Password validation hook
 export const usePasswordValidation = () => {
     const validatePassword = (password: string, confirmPassword?: string): PasswordValidation => {
         const errors: string[] = [];
@@ -77,7 +77,7 @@ export default function Authentication() {
         email: "",
         confirmPassword: ""
     })
-
+    
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value })
     }
