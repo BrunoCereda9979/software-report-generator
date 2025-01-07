@@ -7,7 +7,7 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Software Tracker',
+  title: 'Software Portfolio Tracker',
   description: 'Track and manage software used by the City Of Rocky Mount',
 };
 

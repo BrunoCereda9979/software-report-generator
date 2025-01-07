@@ -70,10 +70,12 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
         software_number_of_licenses: 0,
         software_to_operate: [],
         hardware_to_operate: [],
-        software_annual_amount: 0,
-        software_annual_amount_detail: '',
+        software_monthly_cost: 0,
+        software_cost_detail: '',
         software_gl_accounts: [],
-        software_operational_status: ""
+        software_operational_status: "",
+        software_gasb_compliant: false,
+        software_contract_number: ""
     })
     const [newContact, setNewContact] = useState<NewContactPerson>({
         contact_name: "",
@@ -106,10 +108,12 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                 software_number_of_licenses: 0,
                 software_to_operate: [],
                 hardware_to_operate: [],
-                software_annual_amount: 0,
-                software_annual_amount_detail: '',
+                software_monthly_cost: 0,
+                software_cost_detail: '',
                 software_gl_accounts: [],
-                software_operational_status: ""
+                software_operational_status: "",
+                software_gasb_compliant: false,
+                software_contract_number: ""
             })
         }
     }, [mode, software]);
@@ -171,10 +175,12 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                 software_number_of_licenses: 0,
                 software_to_operate: [],
                 hardware_to_operate: [],
-                software_annual_amount: 0,
-                software_annual_amount_detail: '',
+                software_monthly_cost: 0,
+                software_cost_detail: '',
                 software_gl_accounts: [],
-                software_operational_status: ""
+                software_operational_status: "",
+                software_gasb_compliant: false,
+                software_contract_number: ""
             })
         }
         catch (error: any) {
@@ -602,27 +608,58 @@ export default function SoftwareDialog({ isOpen, onClose, onSave, mode, software
                         {/* <Separator className="my-4" /> */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="annualCost" className="text-right">
-                                Annual Cost
+                                Monthly Cost
                             </Label>
                             <Input
                                 id="annualCost"
                                 type="number"
                                 min={0}
-                                value={newSoftware.software_annual_amount}
-                                onChange={(e) => setNewSoftware({ ...newSoftware, software_annual_amount: parseFloat(e.target.value) })}
+                                value={newSoftware.software_monthly_cost}
+                                onChange={(e) => setNewSoftware({ ...newSoftware, software_monthly_cost: parseFloat(e.target.value) })}
                                 className="col-span-3"
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="annual-cost-detail" className="text-right">
-                                Annual Cost Detail
+                                Cost Detail
                             </Label>
                             <Textarea
                                 id="annual-cost-detail"
-                                value={newSoftware.software_annual_amount_detail}
-                                onChange={(e) => setNewSoftware({ ...newSoftware, software_annual_amount_detail: e.target.value })}
+                                value={newSoftware.software_cost_detail}
+                                onChange={(e) => setNewSoftware({ ...newSoftware, software_cost_detail: e.target.value })}
                                 className="col-span-3 max-h-[90px]"
-                                placeholder="Annual Cost Detail"
+                                placeholder="Cost Detail"
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4 pt-1">
+                            <Label htmlFor="gasb-compliant" className="text-right">
+                                G.A.S.B Compliant
+                            </Label>
+                            <div className="col-span-3 flex items-center">
+                                <Switch
+                                    id="gasb-compliant"
+                                    checked={newSoftware.software_gasb_compliant === true}
+                                    onCheckedChange={(checked) => setNewSoftware({
+                                        ...newSoftware,
+                                        software_gasb_compliant: checked ? true : false
+                                    })}
+                                />
+                                <span className="ml-2">
+                                    {newSoftware.software_gasb_compliant === true ? "Yes" : "No"}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="contract-number" className="text-right">
+                                Contract Number
+                            </Label>
+                            <Input
+                                id="contract-number"
+                                value={newSoftware.software_contract_number}
+                                onChange={(e) => setNewSoftware({ ...newSoftware, software_contract_number: e.target.value })}
+                                className="col-span-3"
+                                required
+                                placeholder="Contract Number"
                             />
                         </div>
                         <Separator className="my-4" />

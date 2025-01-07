@@ -54,7 +54,7 @@ import {
   ArrowUpDown,
   FileDown,
   Search,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react"
 import { format, differenceInDays } from "date-fns"
 import { Software, CommentToAdd } from "@/types/types"
@@ -64,8 +64,8 @@ import Pagination from "./Pagination";
 import { YesNoIndicator } from "./YesNoIndicator";
 import SoftwareComments from "@/components/SoftwareComments";
 import { useRouter } from "next/navigation";
-import Context from "@/components/Context";
-import { Alert } from "./ui/alert";
+import Image from "next/image";
+import ContractUpload from "./ContractUpload";
 
 const mockUser = {
   name: `"cereda"`,
@@ -94,7 +94,7 @@ export default function Dashboard() {
     updateSoftware,
     generateCSV,
     downloadCSV,
-    currentUser
+    currentUser,
   } = useGlobalContext();
   const [softwareToDelete, setSoftwareToDelete] = useState<Software | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -106,6 +106,7 @@ export default function Dashboard() {
   const [departmentFilter, setDepartmentFilter] = useState<number | undefined>(undefined);
   const [divisionFilter, setDivisionFilter] = useState<number | undefined>(undefined);
   const [vendorFilter, setVendorFilter] = useState<number | undefined>(undefined);
+  const [contractNumberFilter, setContractNumberFilter] = useState<number | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(0);
   const [newComment, setNewComment] = useState<CommentToAdd>({
     user_id: currentUser?.user_id,
@@ -331,9 +332,12 @@ export default function Dashboard() {
       const matchesVendor = vendorFilter
         ? s.software_vendor.some((vend) => vend.id === vendorFilter)
         : true;
-      return (matchesName) && matchesStatus && matchesDepartment && matchesDivision && matchesVendor;
+      const matchesContract = contractNumberFilter
+        ? s.software_contract_number === contractNumberFilter.toString()
+        : true;
+      return (matchesName) && matchesStatus && matchesDepartment && matchesDivision && matchesVendor && matchesContract;
     });
-  }, [software, searchTerm, statusFilter, departmentFilter, divisionFilter, vendorFilter]);
+  }, [software, searchTerm, statusFilter, departmentFilter, divisionFilter, vendorFilter, contractNumberFilter]);
 
   const itemsPerPage = 9;
   const totalPages = Math.ceil(filteredSoftware.length / itemsPerPage)
@@ -365,11 +369,14 @@ export default function Dashboard() {
             <div className="px-4 py-6 sm:px-0">
               {/* Actions Bar */}
               <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h2 className="text-3xl font-bold tracking-tight">Software List</h2>
-                  <p className="text-muted-foreground">
-                    Overview of all the sofware used in the city
-                  </p>
+                <div className="flex justify-between items-center">
+                  <Image src="/logo.jpg" alt="Logo" width={58} height={5} />
+                  <div className="ml-4">
+                    <h2 className="text-3xl font-bold tracking-tight">Software List</h2>
+                    <p className="text-muted-foreground">
+                      Overview of all the sofware used in the city
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
@@ -474,6 +481,28 @@ export default function Dashboard() {
                             {vendor.name}
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                    {/* Contract Number Filter */}
+                    <Select
+                      value={contractNumberFilter?.toString() ?? "all"}
+                      onValueChange={(value) => setContractNumberFilter(value === "all" ? undefined : value)}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Contract Number" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Contract Numbers</SelectItem>
+                        {software
+                          .filter(s => s.software_contract_number)
+                          .map((s) => (
+                            <SelectItem
+                              key={s.id}
+                              value={s.software_contract_number}
+                            >
+                              {s.software_contract_number}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -724,8 +753,13 @@ export default function Dashboard() {
                         ))
                       }
                       <p className="text-sm">Number of Licenses: {selectedSoftware.software_number_of_licenses}</p>
-                      <p className="text-sm">Annual Cost: {selectedSoftware.software_annual_amount ? '$' + selectedSoftware.software_annual_amount.toLocaleString() : <span className="text-gray-400 font-style: italic">Not Estimated</span>}</p>
-                      <p className="text-sm">Annual Cost Detail: {selectedSoftware.software_annual_amount_detail ? '$' + selectedSoftware.software_annual_amount_detail : <span className="text-gray-400 font-style: italic">No Details</span>}</p>
+                      <p className="text-sm">Monthly Cost: {selectedSoftware.software_monthly_cost ? '$' + selectedSoftware.software_monthly_cost.toLocaleString() : <span className="text-gray-400 font-style: italic">Not Estimated</span>}</p>
+                      <p className="text-sm">Annual Cost: {selectedSoftware.software_annual_cost ? '$' + selectedSoftware.software_annual_cost.toLocaleString() : <span className="text-gray-400 font-style: italic">Not Estimated</span>}</p>
+                      <p className="text-sm">
+                        Cost Detail: {selectedSoftware.software_cost_detail
+                          ? selectedSoftware.software_cost_detail
+                          : <span className="text-gray-400 italic">No Details</span>}
+                      </p>
                       <p className="text-sm">
                         GL Account/s:
                         {
@@ -738,6 +772,18 @@ export default function Dashboard() {
                             <span className="text-gray-400 font-style: italic"> No GL Accounts Associated</span>
                         }
                       </p>
+                      <YesNoIndicator
+                        label="G.A.S.B Compliant"
+                        value={selectedSoftware.software_gasb_compliant}
+                      />
+                      <p className="text-sm">Contract Number: {selectedSoftware.software_contract_number ? selectedSoftware.software_contract_number : <span className="text-gray-400 font-style: italic">Unknown</span>}</p>
+                      {/* <div className="flex items-center">
+                        <Button variant="secondary">
+                          <Paperclip className="mr-2 h-4 w-4" /> Add Contract PDF
+                        </Button>
+                        <p className="ml-2 text-sm text-gray-500">software_portfolio_analytics.pdf</p>
+                      </div> */}
+                      {/* <ContractUpload /> */}
                     </div>
                     <Separator className="my-4" />
                     <div>

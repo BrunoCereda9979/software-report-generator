@@ -96,8 +96,11 @@ interface Software {
   hardware_to_operate: HardwareToOperate[];
   software_gl_accounts: GlAccount[];
   software_operational_status: string;
-  software_annual_amount?: number;
-  software_annual_amount_detail?: string;
+  software_monthly_cost?: number;
+  software_cost_detail?: string;
+  software_annual_cost?: number;
+  software_gasb_compliant: boolean;
+  software_contract_number: string;
 }
 
 interface NewSoftware {
@@ -121,8 +124,10 @@ interface NewSoftware {
   hardware_to_operate: Item[];
   software_gl_accounts: Item[];
   software_operational_status: string;
-  software_annual_amount?: number;
-  software_annual_amount_detail?: string;
+  software_monthly_cost?: number;
+  software_cost_detail?: string;
+  software_gasb_compliant: boolean;
+  software_contract_number: string
 }
 
 interface User {

@@ -7,6 +7,7 @@ import {
     ArrowUp,
     DollarSign,
     Download,
+    FileDown,
     Package2,
     ThumbsDown,
     ThumbsUp,
@@ -21,6 +22,8 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AlertCircle } from "lucide-react";
+import Image from "next/image";
+import jsPDF from "jspdf";
 
 const mockUser = {
     name: `"cereda"`,
@@ -67,47 +70,49 @@ export default function Analytics() {
 
     const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
-    const downloadCSV = () => {
-        const headers = [
-            "Metric",
-            "Value",
-        ]
+    const downloadPDF = () => {
+        const doc = new jsPDF();
 
+        // Title
+        doc.setFontSize(14);
+        doc.text("Software Analytics Report", 10, 10);
+
+        // Add metrics
         const data = [
+            ["Metric", "Value"],
             ["Total Software Spending", `$${analyticsData.totalSpending}`],
             ["Average Satisfaction Rate", `${analyticsData.averageSatisfaction}/5.0`],
             ["Active Software", `${analyticsData.activeSoftware}/${analyticsData.totalSoftware}`],
-            ["Expiring Soon", analyticsData.expiringSoon],
+            ["Expiring Soon", `${analyticsData.expiringSoon}`],
             ["Most Expensive Software", `${analyticsData.mostExpensive.software_name} ($${analyticsData.mostExpensive.software_annual_amount})`],
             ["Cheapest Software", `${analyticsData.cheapest.software_name} ($${analyticsData.cheapest.software_annual_amount})`],
             ["Average Software Cost", `$${analyticsData.averageCost}`],
             ["Highest Rated Software", `${analyticsData.highestRated.software__software_name} (${analyticsData.highestRated.satisfaction_rate}/5.0)`],
             ["Lowest Rated Software", `${analyticsData.lowestRated.software__software_name} (${analyticsData.lowestRated.satisfaction_rate}/5.0)`],
-            ["Active Licenses", analyticsData.activeLicenses],
-            ["Inactive Licenses", analyticsData.inactiveLicenses],
-        ]
+            ["Active Licenses", `${analyticsData.activeLicenses}`],
+            ["Inactive Licenses", `${analyticsData.inactiveLicenses}`],
+        ];
 
         analyticsData.vendors.forEach((vendor, index) => {
-            data.push([`Vendor ${index + 1}`, `${vendor.name} (${vendor.products} products)`])
-        })
+            data.push([`Vendor ${index + 1}`, `${vendor.name} (${vendor.products} products)`]);
+        });
 
-        const csvContent = [
-            headers.join(','),
-            ...data.map(row => row.join(','))
-        ].join('\n')
+        // Table styling
+        const startX = 10;
+        const startY = 20;
+        const rowHeight = 10;
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-        const link = document.createElement('a')
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob)
-            link.setAttribute('href', url)
-            link.setAttribute('download', 'software_analytics.csv')
-            link.style.visibility = 'hidden'
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-        }
-    }
+        // Add table to the PDF
+        data.forEach((row, index) => {
+            const y = startY + index * rowHeight;
+            doc.text(row[0].toString(), startX, y); // Metric
+            doc.text(row[1].toString(), startX + 70, y); // Value
+        });
+
+        // Save the PDF
+        doc.save("software_portfolio_analytics.pdf");
+    };
+
 
     const tokenIsExpired = (token: any) => {
         try {
@@ -167,15 +172,18 @@ export default function Analytics() {
                 <div className={`flex-1 overflow-auto transition-all duration-300 ${isMenuOpen ? 'ml-64' : 'ml-20'}`}>
                     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between space-y-2 p-8">
-                            <div>
-                                <h2 className="text-3xl font-bold tracking-tight">Software Analytics</h2>
-                                <p className="text-muted-foreground">
-                                    Overview of the software portfolio metrics and performance
-                                </p>
+                            <div className="flex items-center justify-between">
+                                <Image src="/logo.jpg" alt="Logo" width={58} height={58} />
+                                <div className="ml-4">
+                                    <h2 className="text-3xl font-bold tracking-tight">Software Analytics</h2>
+                                    <p className="text-muted-foreground">
+                                        Overview of the software portfolio metrics and performance
+                                    </p>
+                                </div>
                             </div>
-                            <Button onClick={downloadCSV}>
-                                <Download className="mr-2 h-4 w-4" />
-                                Download CSV
+                            <Button onClick={downloadPDF}>
+                                <FileDown className="mr-2 h-4 w-4" />
+                                Download as PDF
                             </Button>
                         </div>
                         <div className="grid gap-4 p-8 pt-0">

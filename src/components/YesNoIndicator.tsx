@@ -4,11 +4,11 @@ import { Check, X } from "lucide-react";
 
 interface YesNoIndicatorProps {
   label: string; // The label (e.g., "Cloud Based", "Tech Supported")
-  value: string; // The value to check (should be "YES" or other)
+  value: string | boolean | "YES" | "NO"; // The value to check
 }
 
 export const YesNoIndicator: React.FC<YesNoIndicatorProps> = ({ label, value }) => {
-  const isYes = value === 'YES';
+  const isYes = value === 'YES' || value === true;
 
   return (
     <p className="text-sm flex items-center gap-2">
