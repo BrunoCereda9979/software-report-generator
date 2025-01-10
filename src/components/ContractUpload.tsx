@@ -1,14 +1,64 @@
-import React, { useState } from 'react';
-import { Upload, File, Loader2, AlertCircle, Download } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, File, Loader2, AlertCircle, Download, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useGlobalContext } from "@/context/GlobalContext";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+interface Contract {
+    id: number;
+    name: string;
+    uploaded_by: string;
+    uploaded_at: string;
+    size: string;
+    url: string;
+    contract_file: string;
+}
+import { useGlobalContext } from '@/context/GlobalContext';
 
 const ContractUpload = () => {
-    const { selectedSoftware, currentUser } = useGlobalContext();
+    const { selectedSoftware } = useGlobalContext();
     const [uploading, setUploading] = useState(false);
-    const [contracts, setContracts] = useState([]);
+    const [contracts, setContracts] = useState<Contract[]>([]);
     const [error, setError] = useState('');
+
+    const fetchContracts = async () => {
+        if (!selectedSoftware?.id) return;
+
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/contracts/${selectedSoftware.id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`, // Add appropriate auth token
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch contracts');
+            }
+
+            const data: Contract[] = await response.json();
+            setContracts(data);
+        } 
+        catch (err) {
+            console.error(err)
+        }
+    };
+
+    useEffect(() => {
+        fetchContracts();
+    }, [selectedSoftware?.id]);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -23,52 +73,76 @@ const ContractUpload = () => {
         setUploading(true);
 
         try {
-            console.log('Uploading file...')
-            const softwareId = selectedSoftware?.id;
-
             const formData = new FormData();
-            formData.append('contract_file', file);
-            formData.append('name', file.name);
-            formData.append('user_id', currentUser.user_id.toString());
-            formData.append('uploaded_at', new Date().toISOString());
-            formData.append('size', file.size.toString());
+            formData.append('file', file);
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software/${softwareId}/contract`, {
-                method: 'POST',
-                body: formData,
-            });
-            console.log('CONTRACT POST RESPONSE:', response)
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/software/${selectedSoftware?.id}/contracts`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                    },
+                    body: formData,
+                }
+            );
+
             if (!response.ok) {
                 throw new Error('Failed to upload file');
             }
 
             const data = await response.json();
 
-            const newContract = {
-                id: Date.now(),
+            const newContract: Contract = {
+                id: data.id,
                 name: file.name,
-                user_id: currentUser?.user_id,
-                uploadedAt: new Date().toISOString(),
-                size: (file.size / 1024).toFixed(2) + ' KB',
-                url: data.contract_url, // Use URL returned by the server
+                uploaded_by: 'Current User',
+                uploaded_at: new Date().toISOString(),
+                size: `${(file.size / 1024).toFixed(2)} KB`,
+                url: data.url,
             };
 
             setContracts([newContract, ...contracts]);
-        }
+        } 
         catch (err) {
             setError('Failed to upload file. Please try again.');
-        }
+        } 
         finally {
             setUploading(false);
+            e.target.value = '';
+            fetchContracts();
         }
     };
 
+    const handleDelete = async (contractId: number) => {
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/contracts/${contractId}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                    },
+                }
+            );
+    
+            if (!response.ok) {
+                throw new Error('Failed to delete the contract');
+            }
+
+            setContracts(contracts.filter(contract => contract.id !== contractId));
+        } 
+        catch (err) {
+            console.error(err);
+            setError('Failed to delete file. Please try again.');
+        }
+    };
 
     return (
         <div className="w-full max-w-2xl space-y-4">
-            <Card className='mt-5'>
+            <Card className='mt-4'>
                 <CardHeader>
-                    <CardTitle className='font-medium text-sm'>Contract Documents</CardTitle>
+                    <CardTitle className='text-sm'>Contract Documents</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
@@ -86,7 +160,7 @@ const ContractUpload = () => {
                                 ) : (
                                     <>
                                         <Upload className="h-8 w-8 mb-2 text-gray-500" />
-                                        <p className="text-sm text-gray-500">Click to upload contract PDF</p>
+                                        <p className="text-xs text-gray-500">Click to upload contract PDF</p>
                                     </>
                                 )}
                             </div>
@@ -105,24 +179,45 @@ const ContractUpload = () => {
                                     <File className="h-5 w-5 text-blue-500 mr-3" />
                                     <div className="flex-1">
                                         <a
-                                            href={contract.url}
+                                            href={`${process.env.NEXT_PUBLIC_API_MEDIA_URL}${contract.contract_file}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="font-bold text-sm hover:text-blue-500"
+                                            className="font-medium text-sm hover:text-blue-500"
                                         >
                                             {contract.name}
                                         </a>
-                                        <p className="text-sm text-gray-500">
-                                            Uploaded by {contract.uploadedBy} • {new Date(contract.uploadedAt).toLocaleString()} • {contract.size}
+                                        <p className="text-xs text-gray-500">
+                                            Uploaded by {contract.uploaded_by} • {new Date(contract.uploaded_at).toLocaleString()} • {contract.size}
                                         </p>
                                     </div>
-                                    <a
-                                        href={contract.url}
-                                        download
-                                        className="p-2 hover:bg-gray-100 rounded-full"
-                                    >
-                                        <Download className="h-5 w-5 text-gray-500" />
-                                    </a>
+                                    <div className="flex items-center gap-2">
+                                        <a
+                                            href={contract.url}
+                                            download
+                                            className="p-2 hover:bg-gray-100 rounded-full"
+                                        >
+                                            <Download className="h-5 w-5 text-gray-500" />
+                                        </a>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger>
+                                                <div className="p-2 hover:bg-gray-100 rounded-full">
+                                                    <Trash2 className="h-5 w-5 text-red-500" />
+                                                </div>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Delete Contract</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Are you sure you want to delete {contract.name}? This action cannot be undone.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(contract.id)}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </div>
                             ))}
                         </div>

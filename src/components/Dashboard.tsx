@@ -777,13 +777,7 @@ export default function Dashboard() {
                         value={selectedSoftware.software_gasb_compliant}
                       />
                       <p className="text-sm">Contract Number: {selectedSoftware.software_contract_number ? selectedSoftware.software_contract_number : <span className="text-gray-400 font-style: italic">Unknown</span>}</p>
-                      {/* <div className="flex items-center">
-                        <Button variant="secondary">
-                          <Paperclip className="mr-2 h-4 w-4" /> Add Contract PDF
-                        </Button>
-                        <p className="ml-2 text-sm text-gray-500">software_portfolio_analytics.pdf</p>
-                      </div> */}
-                      {/* <ContractUpload /> */}
+                      <ContractUpload />
                     </div>
                     <Separator className="my-4" />
                     <div>
