@@ -235,7 +235,7 @@ export default function Dashboard() {
         user_name: currentUser?.username,
       };
 
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/comments/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/comments/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -250,7 +250,7 @@ export default function Dashboard() {
         throw new Error('Failed to add comment');
       }
 
-      const commentsResponse = await fetch(`http://127.0.0.1:8000/api/v1/software/${selectedSoftware.id}/comments`, {
+      const commentsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/software/${selectedSoftware.id}/comments`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

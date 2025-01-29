@@ -111,8 +111,8 @@ export default function Authentication() {
         }
 
         const url = activeTab === "login"
-            ? "http://127.0.0.1:8000/api/v1/login"
-            : "http://127.0.0.1:8000/api/v1/register"
+            ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/login`
+            : `${process.env.NEXT_PUBLIC_API_BASE_URL}/register`
 
         const payload = activeTab === "login"
             ? {
