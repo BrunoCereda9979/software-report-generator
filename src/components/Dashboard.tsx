@@ -122,6 +122,7 @@ export default function Dashboard() {
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   useEffect(() => {
+    console.log('Current User:', currentUser)
     if (selectedSoftware?.id) {
       setNewComment(prev => ({
         ...prev,
@@ -302,22 +303,6 @@ export default function Dashboard() {
     }
     setSortConfig({ key, direction });
   }
-
-  // const sortedSoftware = useMemo(() => {
-  //   let sortableItems = [...software];
-  //   if (sortConfig.key !== null) {
-  //     sortableItems.sort((a, b) => {
-  //       if (a[sortConfig.key] < b[sortConfig.key]) {
-  //         return sortConfig.direction === 'ascending' ? -1 : 1;
-  //       }
-  //       if (a[sortConfig.key] > b[sortConfig.key]) {
-  //         return sortConfig.direction === 'ascending' ? 1 : -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-  //   return sortableItems;
-  // }, [software, sortConfig]);
 
   const filteredSoftware = useMemo(() => {
     return software.filter((s) => {
@@ -588,9 +573,11 @@ export default function Dashboard() {
                               <Button variant="outline" size="sm" onClick={() => handleEditSoftware(s)}>
                                 Edit
                               </Button>
-                              <Button variant="destructive" size="sm" onClick={() => setSoftwareToDelete(s)}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              {currentUser?.role === 'Admin' && (
+                                <Button variant="destructive" size="sm" onClick={() => setSoftwareToDelete(s)}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
