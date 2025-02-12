@@ -4,7 +4,7 @@ const next = require("next");
 
 const dev = process.env.NODE_ENV !== "production";
 
-const port = process.env.PORT || 3000; // Change the port to the port that your IIS is running on. Default its 80 and 3000 if you are using it for developing.
+const port = process.env.PORT || 3000;
 const hostname = "localhost";
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
